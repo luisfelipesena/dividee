@@ -1,50 +1,155 @@
-# Welcome to your Expo app 👋
+# Guia de Deploy do Monorepo Dividee
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este documento contém as instruções para build, deploy e configuração dos ambientes de desenvolvimento, staging e produção para o monorepo Dividee.
 
-## Get started
+## Pré-requisitos
 
-1. Install dependencies
+- [Bun](https://bun.sh/) instalado
+- Conta na [Vercel](https://vercel.com/) (para deploy do web app)
+- Conta na [Expo](https://expo.dev/) (para deploy do mobile app)
+- [EAS CLI](https://docs.expo.dev/eas-update/getting-started/) instalado: `bun install -g eas-cli`
 
-   ```bash
-   npm install
-   ```
+## 1. Configuração Inicial
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### Login no Expo (para mobile)
 
 ```bash
-npm run reset-project
+eas login
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Clone e instalação
 
-## Learn more
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/dividee.git
+cd dividee
 
-To learn more about developing your project with Expo, look at the following resources:
+# Instale as dependências
+bun install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 2. Ambientes
 
-## Join the community
+### Configurar variáveis de ambiente
 
-Join our community of developers creating universal apps.
+#### Web (Next.js)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Crie arquivos `.env.local`, `.env.development`, `.env.production` na pasta `apps/web`:
+
+```bash
+# Exemplo para .env.production
+NEXT_PUBLIC_API_URL=https://api.example.com
+```
+
+#### Mobile (Expo)
+
+Edite o arquivo `apps/mobile/app.config.js` para cada ambiente:
+
+```js
+export default {
+  expo: {
+    // Configurações comuns
+    name: "Dividee",
+    // ...
+    extra: {
+      apiUrl: process.env.API_URL || "https://api.example.com",
+    },
+  },
+};
+```
+
+## 3. Processo de Build e Deploy
+
+### Core Package
+
+```bash
+# Build do pacote core
+bun run core:build
+```
+
+### Web App (Next.js)
+
+#### Build local
+
+```bash
+# Build do app web (inclui build do core)
+bun run web:build
+
+# Teste local do build
+bun --cwd apps/web start
+```
+
+#### Deploy na Vercel
+
+```bash
+# Instale o CLI da Vercel (se necessário)
+bun install -g vercel
+
+# Deploy em produção
+cd apps/web
+vercel --prod
+```
+
+### Mobile App (Expo)
+
+#### Build de preview
+
+```bash
+# Gere um build de teste (APK para Android)
+bun run mobile:eas-build --platform android --profile preview
+```
+
+#### Build para produção
+
+```bash
+# Build para Google Play
+bun run mobile:eas-build --platform android --profile production
+
+# Build para App Store
+bun run mobile:eas-build --platform ios --profile production
+```
+
+## 4. Comandos do Monorepo
+
+| Comando | Descrição |
+|---------|-----------|
+| `bun install` | Instala todas as dependências |
+| `bun run web` | Executa o app web em modo de desenvolvimento |
+| `bun run mobile` | Executa o app mobile em modo de desenvolvimento |
+| `bun run core:build` | Compila o pacote core |
+| `bun run web:build` | Compila o app web para produção |
+| `bun run mobile:build` | Gera o bundle para o app mobile |
+| `bun run mobile:eas-build` | Gera builds nativos do app mobile |
+| `bun run build` | Compila core + web |
+| `bun run clean` | Limpa pastas de build |
+
+## 5. Workflow de Deploy Contínuo
+
+### Staging
+
+1. Faça push para a branch `staging`
+2. Deploy automático na Vercel (staging)
+3. Build automático do app mobile (preview)
+
+### Produção
+
+1. Faça push para a branch `main` ou crie uma tag
+2. Deploy automático na Vercel (production)
+3. Build automático do app mobile (production)
+4. Submeta manualmente para as lojas:
+   ```bash
+   eas submit --platform android
+   eas submit --platform ios
+   ```
+
+## 6. Troubleshooting
+
+- **Erro no build do core**: Verifique o `tsconfig.json` e certifique-se de que as dependências estão instaladas
+- **Erro no deploy web**: Verifique as variáveis de ambiente na Vercel
+- **Erro no build mobile**: Execute `eas build:clean` e tente novamente
+
+---
+
+Para mais informações, consulte a documentação oficial:
+- [Next.js Deployment](https://nextjs.org/docs/deployment)
+- [Expo EAS Build](https://docs.expo.dev/build/introduction/) 
