@@ -1,143 +1,134 @@
-import Image from "next/image";
-import Link from "next/link";
+import Link from 'next/link';
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="grid min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col items-center gap-8">
-        <div className="flex flex-col items-center gap-4">
-          <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={180}
-            height={38}
-            priority
-          />
-          <h1 className="text-3xl font-bold text-center">Welcome to Dividee</h1>
-          <p className="max-w-md text-center text-gray-600 dark:text-gray-300">
-            A modern, full-stack application built with Next.js and Expo in a Turborepo monorepo structure.
+    <div className="min-h-screen text-white bg-gradient-to-br from-slate-900 to-slate-800">
+      {/* Header */}
+      <header className="px-4 py-6 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-between">
+          <div className="text-3xl font-bold text-sky-400">
+            Carteira
+          </div>
+          <div>
+            <Link href="/auth/login" className="mr-6 text-sky-300 hover:text-sky-100">
+              Login
+            </Link>
+            <Link href="/auth/signup" className="px-4 py-2 font-semibold text-white transition duration-150 rounded-lg bg-sky-500 hover:bg-sky-600">
+              Sign Up
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-20 text-center md:py-32">
+        <div className="container px-4 mx-auto">
+          <h1 className="mb-6 text-5xl font-extrabold md:text-7xl">
+            Share Subscriptions, <span className="text-sky-400">Save Money</span>. Securely.
+          </h1>
+          <p className="max-w-3xl mx-auto mb-10 text-xl md:text-2xl text-slate-300">
+            Carteira makes it easy to split costs for streaming services and other subscriptions with people you trust.
           </p>
+          <Link href="/auth/signup" className="px-10 py-4 text-xl font-bold text-white transition duration-150 rounded-lg bg-sky-500 hover:bg-sky-600">
+            Get Started
+          </Link>
         </div>
-        
-        <div className="grid w-full max-w-3xl grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="flex flex-col gap-4 p-6 border border-gray-200 rounded-lg dark:border-gray-800">
-            <h2 className="text-xl font-semibold">Authentication</h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Create an account or log in to access all features of Dividee.
-            </p>
-            <div className="flex flex-col gap-2 mt-2">
-              <Link 
-                href="/auth/login"
-                className="px-4 py-2 text-center text-white bg-blue-600 rounded-md hover:bg-blue-700"
-              >
-                Login
-              </Link>
-              <Link 
-                href="/auth/signup"
-                className="px-4 py-2 text-center text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20"
-              >
-                Sign Up
-              </Link>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-slate-800">
+        <div className="container px-4 mx-auto text-center">
+          <h2 className="mb-12 text-4xl font-bold text-sky-400">Sharing Made Simple</h2>
+          <div className="grid gap-10 md:grid-cols-3">
+            <div className="p-8 transition-transform duration-300 transform shadow-xl bg-slate-700 rounded-xl hover:scale-105">
+              <div className="mb-4 text-5xl text-sky-400">1</div>
+              <h3 className="mb-3 text-2xl font-semibold">Add Subscriptions</h3>
+              <p className="text-slate-300">
+                Register the services you want to share with your group.
+              </p>
             </div>
-          </div>
-          
-          <div className="flex flex-col gap-4 p-6 border border-gray-200 rounded-lg dark:border-gray-800">
-            <h2 className="text-xl font-semibold">Mobile App</h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Download our mobile app to use Dividee on the go.
-            </p>
-            <div className="flex flex-col gap-2 mt-2">
-              <Link 
-                href="/download"
-                className="px-4 py-2 text-center text-white bg-gray-800 rounded-md hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600"
-              >
-                Download App
-              </Link>
-              <Link 
-                href="/docs/mobile"
-                className="px-4 py-2 text-center text-gray-800 border border-gray-800 rounded-md dark:border-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/50"
-              >
-                Learn More
-              </Link>
+            <div className="p-8 transition-transform duration-300 transform shadow-xl bg-slate-700 rounded-xl hover:scale-105">
+              <div className="mb-4 text-5xl text-sky-400">2</div>
+              <h3 className="mb-3 text-2xl font-semibold">Invite Members</h3>
+              <p className="text-slate-300">
+                Securely invite friends or family to join your shared accounts.
+              </p>
+            </div>
+            <div className="p-8 transition-transform duration-300 transform shadow-xl bg-slate-700 rounded-xl hover:scale-105">
+              <div className="mb-4 text-5xl text-sky-400">3</div>
+              <h3 className="mb-3 text-2xl font-semibold">Save Together</h3>
+              <p className="text-slate-300">
+                Split the costs and enjoy your favorite services for less.
+              </p>
             </div>
           </div>
         </div>
-        
-        <div className="flex flex-col items-center gap-4 mt-4 sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      </section>
+
+      {/* Features Overview Section */}
+      <section className="py-16">
+        <div className="container px-4 mx-auto text-center">
+          <h2 className="mb-16 text-4xl font-bold text-sky-400">Why Choose Carteira?</h2>
+          <div className="grid gap-12 md:grid-cols-3">
+            <div className="flex flex-col items-center">
+              {/* Placeholder for an icon */}
+              <div className="inline-block p-4 mb-6 rounded-full bg-sky-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+              </div>
+              <h3 className="mb-3 text-2xl font-semibold">Top-Notch Security</h3>
+              <p className="max-w-xs text-slate-300">
+                We prioritize your security. Carteira integrates with Bitwarden to ensure your credentials are managed safely.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              {/* Placeholder for an icon */}
+              <div className="inline-block p-4 mb-6 rounded-full bg-sky-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6.75A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75V12m18 0v-6.75A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25V12m15-6.75V9" />
+                </svg>
+              </div>
+              <h3 className="mb-3 text-2xl font-semibold">Effortless Savings</h3>
+              <p className="max-w-xs text-slate-300">
+                Stop overpaying. Divide expenses and see your savings grow, all in one place.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              {/* Placeholder for an icon */}
+              <div className="inline-block p-4 mb-6 rounded-full bg-sky-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-3.741-5.582M12 15.75a3 3 0 100-5.999 3 3 0 000 5.999zM12 12.75v.007A4.507 4.507 0 0115.75 15a4.507 4.507 0 01-3.75 2.25A4.507 4.507 0 018.25 15a4.507 4.507 0 013.75-2.25v-.007zM12 12.75H9.75M15.75 12.75H12M12 12.75V10.5M12 15.75V12.75m-3.75 0H12m0 0h3.75m-3.75 0V15m6.362-3.75c.01-.01.014-.025.027-.041a4.506 4.506 0 000-6.422c-.013-.016-.02-.031-.034-.047a4.506 4.506 0 00-6.322 0c-.014.016-.021.031-.034.047a4.506 4.506 0 000 6.422c.013.016.027.03.04.046a4.506 4.506 0 006.322 0z" />
+                </svg>
+              </div>
+              <h3 className="mb-3 text-2xl font-semibold">Stay Organized</h3>
+              <p className="max-w-xs text-slate-300">
+                Manage access, track renewals, and keep everything tidy and under control.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-      
-      <footer className="flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="py-20 bg-slate-800">
+        <div className="container px-4 mx-auto text-center">
+          <h2 className="mb-6 text-4xl font-bold text-sky-400">Ready to Start Saving?</h2>
+          <p className="max-w-2xl mx-auto mb-10 text-xl text-slate-300">
+            Join Carteira today and take control of your subscription spending. Simple, secure, and smart.
+          </p>
+          <Link href="/auth/signup" className="px-10 py-4 text-xl font-bold text-white transition duration-150 rounded-lg bg-sky-500 hover:bg-sky-600">
+            Sign Up Now
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 text-center">
+        <div className="container px-4 mx-auto">
+          <p className="text-slate-400">&copy; {new Date().getFullYear()} Carteira. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
-}
+} 
