@@ -1,0 +1,122 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Architecture Documentation for Dividee Monorepo
+
+This project is a monorepo built with Turborepo and pnpm, containing two main applications: a Next.js web app and an Expo mobile app.
+
+## Project Structure
+
+```
+dividee/
+├── apps/
+│   ├── web/             # Next.js web application
+│   │   ├── src/
+│   │   │   ├── app/     # Next.js App Router
+│   │   │   ├── config/  # Environment configuration
+│   │   │   ├── hooks/   # React Query + Axios hooks
+│   │   │   └── lib/     # Utility libraries (Supabase, etc.)
+│   │   └── ...
+│   └── mobile/          # Expo mobile application
+│       ├── src/
+│       │   ├── config/  # Environment configuration
+│       │   ├── hooks/   # React Query + Axios hooks
+│       │   ├── screens/ # UI screens
+│       │   └── services/# API services
+│       └── ...
+├── packages/            # Shared packages (if needed)
+└── ...
+```
+
+## Key Technologies
+
+- **Monorepo**: Turborepo + pnpm
+- **Web**: Next.js, Tailwind CSS, Supabase
+- **Mobile**: Expo, NativeWind, React Query
+- **Backend**: Supabase (via Next.js API routes)
+- **Authentication**: Supabase Auth
+
+## Architecture Highlights
+
+### Web Application (Next.js)
+
+- Uses App Router and Server Components
+- Supabase integration via `@supabase/ssr`
+- API routes under `src/app/api/` for backend functionality
+- Environment variables managed through `src/config/env.ts`
+
+### Mobile Application (Expo)
+
+- React Native with Expo
+- Uses NativeWind for styling (Tailwind for React Native)
+- Consumes APIs from the Next.js backend
+- Environment variables managed through `src/config/env.ts`
+
+### Data Fetching Strategy
+
+#### Web
+
+- Server Components for initial data fetching
+- Client Components use React Query for client-side data fetching and mutations
+
+#### Mobile
+
+- React Query for data fetching, caching, and state management
+- Axios for API requests
+
+## Hooks Directory Structure
+
+### Why We Need `/hooks` Directories
+
+Both applications should maintain a `/hooks` directory for:
+
+1. **Separation of concerns**: Keeping API calls separate from UI components
+2. **Reusability**: Hooks can be reused across multiple components
+3. **Centralized data fetching**: Single source of truth for data operations
+4. **Type safety**: Enforcing consistent typing across the application
+
+### Example Hook Structure
+
+```typescript
+// apps/web/src/hooks/useUsers.ts or apps/mobile/src/hooks/useUsers.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { env } from '../config/env';
+
+export function useUsers() {
+  const queryClient = useQueryClient();
+  
+  // Query hook for fetching users
+  const usersQuery = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const response = await axios.get(`${env.apiUrl}/api/users`);
+      return response.data;
+    }
+  });
+  
+  // Mutation hook for creating a user
+  const createUserMutation = useMutation({
+    mutationFn: async (userData) => {
+      const response = await axios.post(`${env.apiUrl}/api/users`, userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate and refetch users list after mutation
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    }
+  });
+  
+  return {
+    users: usersQuery.data || [],
+    isLoading: usersQuery.isLoading,
+    error: usersQuery.error,
+    createUser: createUserMutation.mutate
+  };
+}
+```
+
+This structure ensures consistent data fetching patterns and state management across both applications.

@@ -1,84 +1,99 @@
-# Turborepo starter
+# Dividee
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, full-stack application built with Next.js and Expo in a Turborepo monorepo structure.
 
-## Using this example
+## Architecture Overview
 
-Run the following command:
+Dividee is organized as a monorepo using Turborepo and pnpm, containing two main applications:
 
-```sh
-npx create-turbo@latest
-```
+### Web Application (Next.js)
 
-## What's inside?
+- **Technology Stack**: Next.js, Tailwind CSS, Supabase
+- **Features**:
+  - Server-side rendering with Next.js App Router
+  - Authentication via Supabase Auth
+  - API routes that serve as the backend for both web and mobile apps
+  - React Query for client-side data fetching and state management
 
-This Turborepo includes the following packages/apps:
+**Key Directories**:
+- `/apps/web/src/app` - Next.js App Router pages and API routes
+- `/apps/web/src/hooks` - React Query hooks for data fetching
+- `/apps/web/src/lib/supabase` - Supabase client utilities
 
-### Apps and Packages
+### Mobile Application (Expo)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **Technology Stack**: React Native with Expo, NativeWind, React Query
+- **Features**:
+  - Native mobile experience for iOS and Android
+  - Same authentication flow as the web app
+  - Consumes the Next.js API endpoints
+  - Offline support and optimistic updates
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+**Key Directories**:
+- `/apps/mobile/src/screens` - UI screens for the mobile app
+- `/apps/mobile/src/hooks` - React Query hooks for data fetching
+- `/apps/mobile/src/services` - API services for communicating with the backend
 
-### Utilities
+## Data Flow Architecture
 
-This Turborepo has some additional tools already setup for you:
+1. **Backend**: Supabase (PostgreSQL database) serves as the primary data store
+2. **API Layer**: Next.js API routes in the web app provide a unified API for both applications
+3. **Client Data Management**: React Query is used in both apps to handle:
+   - Data fetching and caching
+   - Background refetching
+   - Mutations and optimistic updates
+   - Error handling
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Getting Started
 
-### Build
+For detailed setup instructions, please refer to the [Development Guide](./DEVELOPMENT.md).
 
-To build all apps and packages, run the following command:
+Quick start:
+```bash
+# Install dependencies
+pnpm install
 
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
+# Run both apps
 pnpm dev
 ```
 
-### Remote Caching
+## Deployment
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+For production deployment instructions, please refer to the [Deployment Guide](./DEPLOY.md).
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## Project Structure
 
 ```
-cd my-turborepo
-npx turbo login
+dividee/
+├── apps/
+│   ├── web/             # Next.js web application
+│   │   ├── src/
+│   │   │   ├── app/     # Next.js App Router
+│   │   │   ├── config/  # Environment configuration
+│   │   │   ├── hooks/   # React Query hooks
+│   │   │   └── lib/     # Utility libraries (Supabase, etc.)
+│   │   └── ...
+│   └── mobile/          # Expo mobile application
+│       ├── src/
+│       │   ├── config/  # Environment configuration
+│       │   ├── hooks/   # React Query hooks
+│       │   ├── screens/ # UI screens
+│       │   └── services/# API services
+│       └── ...
+├── packages/            # Shared packages (if needed)
+└── ...
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## TODO
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+- [ ] Add product description and purpose
+- [ ] Detail user flows and key features
+- [ ] Add screenshots of the app in action
+- [ ] List planned features and roadmap
+- [ ] Add contribution guidelines
+- [ ] Include license information
 
-```
-npx turbo link
-```
+---
 
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+For local development setup, see [DEVELOPMENT.md](./DEVELOPMENT.md)  
+For deployment instructions, see [DEPLOY.md](./DEPLOY.md) 
