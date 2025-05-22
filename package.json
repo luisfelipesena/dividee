@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "api": "next dev -p 4000",
+    "api": "NEXT_IGNORE_WARN=1 next dev -p 4000",
+    "api:build": "next build",
+    "api:start": "next start -p 4000",
     "test-api": "node ./scripts/test-api.js",
     "dev": "concurrently \"npm run api\" \"npm run web\" -n \"API,EXPO\" -c \"blue,green\""
   },
