@@ -1,31 +1,73 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { db, users } from '@/lib/db';
+import { verifyPassword } from '@/lib/auth/password';
+import { generateToken } from '@/lib/auth/jwt';
+import { eq } from 'drizzle-orm';
 
-export async function POST(request: Request) {
-  const { email, password } = await request.json()
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
 
-  if (!email || !password) {
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { email, password } = loginSchema.parse(body);
+
+    // Find user by email
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Verify password
+    const isPasswordValid = await verifyPassword(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    // Generate JWT token
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
+
+    return NextResponse.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        createdAt: user.createdAt,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Email and password are required' },
-      { status: 400 }
-    )
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
-
-  const supabase = createClient()
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 400 }
-    )
-  }
-
-  return NextResponse.json({ 
-    user: data.user
-  })
 } 

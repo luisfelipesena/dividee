@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function POST() {
-  const supabase = createClient()
-  await supabase.auth.signOut()
+  // Since we're using stateless JWT tokens, logout is handled client-side
+  // by removing the token from storage. This endpoint exists for consistency
+  // and future use (e.g., token blacklisting)
   
   return NextResponse.json({
-    message: 'Logout successful'
+    message: 'Logged out successfully',
   })
 } 
