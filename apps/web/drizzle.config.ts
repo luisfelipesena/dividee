@@ -10,6 +10,7 @@ export default defineConfig({
     user: process.env.DB_USER || 'dividee_user',
     password: process.env.DB_PASSWORD || 'dividee_password',
     database: process.env.DB_NAME || 'dividee',
+    ssl: false,
   },
   verbose: true,
   strict: true,
