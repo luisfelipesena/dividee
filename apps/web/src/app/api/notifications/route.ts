@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { withAuth } from '@/lib/auth/middleware';
 import { db, notifications, subscriptions } from '@/lib/db';
-import { eq, and, desc, or } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const createNotificationSchema = z.object({
   title: z.string().min(1).max(255),
@@ -28,7 +28,7 @@ export const GET = withAuth(async (req) => {
     const type = url.searchParams.get('type');
     const limit = parseInt(url.searchParams.get('limit') || '50');
 
-    let whereConditions = [eq(notifications.userId, req.user.userId)];
+    const whereConditions = [eq(notifications.userId, req.user.userId)];
 
     if (unreadOnly) {
       whereConditions.push(eq(notifications.isRead, false));
