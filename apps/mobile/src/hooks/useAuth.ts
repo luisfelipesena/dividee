@@ -12,6 +12,7 @@ export type AuthCredentials = {
 export type User = {
   id: string;
   email: string;
+  name: string;
 };
 
 /**

@@ -45,6 +45,10 @@ export async function POST(req: NextRequest) {
       email: user.email,
     });
 
+    // Log successful login
+    const auditLogger = await import('@/lib/audit/logger');
+    await auditLogger.auditLog.userLogin(user.id, req);
+
     return NextResponse.json({
       message: 'Login successful',
       user: {

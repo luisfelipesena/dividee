@@ -5,21 +5,26 @@ export const env = {
   // Supabase
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-  
+
+  // Bitwarden configuration
+  bitwardenApiUrl: process.env.NEXT_PUBLIC_BITWARDEN_API_URL || '',
+  bitwardenClientId: process.env.NEXT_PUBLIC_BITWARDEN_CLIENT_ID || '',
+  bitwardenClientSecret: process.env.NEXT_PUBLIC_BITWARDEN_CLIENT_SECRET || '',
+
   // App configuration
   nodeEnv: process.env.NODE_ENV || 'development',
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
-  
+
   // Deployment
   vercelUrl: process.env.NEXT_PUBLIC_VERCEL_URL || '',
-  
+
   // Feature flags
   enableAuth: process.env.NEXT_PUBLIC_ENABLE_AUTH !== 'false',
-  
+
   // Validate required environment variables
   validate(): void {
     const requiredVars = ['supabaseUrl', 'supabaseAnonKey'];
-    
+
     for (const key of requiredVars) {
       if (!env[key as keyof typeof env]) {
         console.warn(`Missing required environment variable: ${key}`);

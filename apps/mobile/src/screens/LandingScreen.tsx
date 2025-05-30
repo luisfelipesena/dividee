@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // It looks like you might not have these specific icons in your project yet.
 // We'll use text placeholders for now. You can add SVG or font icons later.
@@ -13,15 +13,12 @@ const IconPlaceholder = ({ name, size = 24, color = 'white' }: { name: string, s
 );
 
 export default function LandingScreen({ navigation }: { navigation?: any }) {
-  // Dummy navigation functions for now - replace with actual navigation if using React Navigation
   const navigateToLogin = () => {
-    console.log('Navigate to Login');
-    // Example: navigation.navigate('Login');
+    navigation?.navigate('Auth', { mode: 'login' });
   };
 
   const navigateToSignup = () => {
-    console.log('Navigate to Signup');
-    // Example: navigation.navigate('Signup');
+    navigation?.navigate('Auth', { mode: 'signup' });
   };
 
   return (
