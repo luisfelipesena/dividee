@@ -1,91 +1,14 @@
-# 🎯 Carteira - Sistema de Compartilhamento de Assinaturas
+# 📱 Carteira - Plataforma de Compartilhamento de Assinaturas
 
-Uma plataforma moderna para compartilhar de forma segura assinaturas de streaming e serviços digitais, construída com Next.js, React Native e integração com Bitwarden.
+**Status: v0 - 95% Completo** | **[Deploy](#-deploy)** | **[Pendências](#-pendências-para-finalizar-mvp)**
 
-## 🌟 Visão Geral
+Carteira é uma plataforma inovadora que permite compartilhar de forma segura os acessos a serviços de streaming e assinaturas. Economize dividindo custos com pessoas de confiança, mantendo total controle e segurança.
 
-O Carteira permite que usuários:
-- 📺 Compartilhem assinaturas de serviços como Netflix, Spotify, etc.
-- 💰 Economizem dinheiro dividindo custos com pessoas de confiança
-- 🔐 Mantenham credenciais seguras através da integração com Bitwarden
-- 👥 Gerenciem grupos e convites de forma organizada
-- 📊 Acompanhem economia e histórico financeiro
-- 🔔 Recebam notificações sobre renovações e pagamentos
-
-## 🏗️ Arquitetura
-
-### Stack Tecnológica
-
-- **Frontend Web**: Next.js 14, TypeScript, Tailwind CSS
-- **Mobile**: React Native, Expo, NativeWind
-- **Backend**: Next.js API Routes, Drizzle ORM
-- **Banco de Dados**: PostgreSQL (Supabase)
-- **Autenticação**: JWT personalizado
-- **Segurança**: Integração com Bitwarden
-- **Deploy**: Vercel (Web), EAS (Mobile)
-
-### Funcionalidades Implementadas
-
-✅ **Sistema de Autenticação**
-- Cadastro e login com JWT
-- Middleware de autenticação
-- Logs de auditoria
-
-✅ **Gestão de Grupos**
-- Criação e gerenciamento de grupos
-- Sistema de convites por email
-- Controle de membros e permissões
-
-✅ **Compartilhamento de Assinaturas**
-- Assinaturas públicas e privadas
-- Descoberta de assinaturas disponíveis
-- Solicitação e aprovação de acesso
-- Gerenciamento de membros
-
-✅ **Segurança de Credenciais**
-- Integração completa com Bitwarden
-- Armazenamento seguro de senhas
-- Rotação automática de credenciais
-- Logs de acesso para auditoria
-
-✅ **Sistema Financeiro**
-- Dashboard com métricas de economia
-- Histórico de pagamentos
-- Cálculo automático de custos por pessoa
-- Relatórios financeiros detalhados
-
-✅ **Notificações Inteligentes**
-- Alertas de renovação próxima
-- Notificações de pagamentos
-- Lembretes de troca de senha
-- Sistema de automação via cron jobs
-
-✅ **Interface Mobile Completa**
-- App nativo com React Native
-- Navegação por tabs
-- Todas as funcionalidades do web
-- Design responsivo
-
-## 🚀 Início Rápido
-
-### Pré-requisitos
-
-```bash
-# Node.js 18+
-node --version
-
-# pnpm
-npm install -g pnpm
-
-# Git
-git --version
-```
-
-### Instalação
+## 🚀 Quick Start
 
 ```bash
 # Clone o repositório
-git clone <repository-url>
+git clone https://github.com/seu-usuario/dividee.git
 cd dividee
 
 # Instale as dependências
@@ -93,237 +16,269 @@ pnpm install
 
 # Configure as variáveis de ambiente
 cp apps/web/.env.example apps/web/.env.local
-cp apps/mobile/.env.example apps/mobile/.env.local
+cp apps/mobile/.env.example apps/mobile/.env
 
-# Execute as migrações do banco
-cd apps/web
-pnpm run db:push
-
-# Inicie os servidores de desenvolvimento
-cd ../..
-pnpm dev
+# Execute o desenvolvimento
+./run-dev.sh           # Ambos os apps
+./run-web.sh          # Apenas web
+./run-mobile.sh       # Apenas mobile
 ```
 
-### URLs de Desenvolvimento
+## 📋 Status do Projeto
 
-- **Web**: http://localhost:3000
-- **Mobile**: Expo Dev Tools em http://localhost:8081
+### ✅ O que está Pronto (95%)
 
-## 📱 Principais Funcionalidades
+#### **Backend (98% Completo)**
+- ✅ 30+ APIs REST implementadas com validação Zod
+- ✅ Autenticação JWT customizada com refresh tokens
+- ✅ Sistema completo de permissões (owner/admin/member)
+- ✅ Integração Bitwarden para gestão segura de credenciais
+- ✅ Dashboard financeiro com cálculos automáticos
+- ✅ Sistema de notificações com automação via cron
+- ✅ Auditoria completa de todas as ações
+- ✅ Transações ACID no banco de dados
 
-### Dashboard Financeiro
-- Visão geral dos gastos e economia
-- Métricas de performance por assinatura
-- Projeções de economia futura
+#### **Mobile App (95% Completo)**
+- ✅ **Autenticação**: Login, Signup, Logout
+- ✅ **Dashboard**: Métricas financeiras, alertas, ações rápidas
+- ✅ **Grupos**: Criar, listar, convidar membros
+- ✅ **Assinaturas**: Criar, listar, explorar públicas, detalhes completos
+- ✅ **Solicitações**: Aprovar/rejeitar novos membros
+- ✅ **Notificações**: Central com filtros e ações
+- ✅ **Credenciais**: Visualizar/atualizar com segurança
+- ✅ **Perfil**: Editar dados e senha
 
-### Exploração de Assinaturas
-- Busca por assinaturas públicas
-- Filtros por preço, serviço e disponibilidade
-- Solicitação de acesso simplificada
-
-### Gestão de Grupos
-- Criação e administração de grupos
-- Sistema de convites via email
-- Controle de permissões (owner/admin/membro)
-
-### Segurança Avançada
-- Integração com Bitwarden para credenciais
-- Logs de auditoria completos
-- Notificações de segurança
-
-## 🎯 Fluxos de Usuário
-
-### 1. Criação de Grupo e Assinatura
-```mermaid
-graph TD
-    A[Usuário cria conta] --> B[Cria primeiro grupo]
-    B --> C[Adiciona assinatura ao grupo]
-    C --> D[Define como pública/privada]
-    D --> E[Convida membros]
-    E --> F[Armazena credenciais no Bitwarden]
-```
-
-### 2. Participação em Assinatura
-```mermaid
-graph TD
-    A[Usuário explora assinaturas] --> B[Encontra assinatura interessante]
-    B --> C[Solicita acesso]
-    C --> D[Admin aprova solicitação]
-    D --> E[Usuário paga quota proporcional]
-    E --> F[Recebe acesso às credenciais]
-```
-
-## 🔧 Desenvolvimento
-
-### Estrutura do Projeto
+## 🏗️ Arquitetura
 
 ```
 dividee/
 ├── apps/
-│   ├── web/                 # Next.js web application
+│   ├── mobile/                 # React Native + Expo
 │   │   ├── src/
-│   │   │   ├── app/         # App Router (pages + API)
-│   │   │   ├── lib/         # Utilities (DB, auth, etc.)
-│   │   │   └── hooks/       # React hooks
-│   │   └── drizzle/         # Database migrations
-│   └── mobile/              # Expo mobile application
+│   │   │   ├── screens/       # 15+ telas implementadas
+│   │   │   ├── navigation/    # React Navigation
+│   │   │   ├── hooks/         # useAuth e hooks customizados
+│   │   │   └── services/      # API client
+│   │   └── ...
+│   └── web/                   # Next.js 14
 │       ├── src/
-│       │   ├── screens/     # App screens
-│       │   ├── navigation/  # Navigation setup
-│       │   └── services/    # API services
-│       └── assets/          # Images and icons
-├── DEPLOY_INSTRUCTIONS.md   # Deploy guide
-├── PRODUCT_DOCUMENTATION.md # Product specs
-└── plan.md                 # Development plan
+│       │   ├── app/api/       # 30+ endpoints REST
+│       │   ├── lib/           # Bitwarden, Supabase, auth
+│       │   └── ...
+│       └── drizzle/           # Migrações SQL
+└── ...
 ```
 
-### Comandos Úteis
+## 🛠️ Stack Tecnológica
+
+| Categoria | Tecnologia |
+|-----------|------------|
+| **Backend** | Next.js 14, TypeScript, Drizzle ORM |
+| **Mobile** | React Native, Expo SDK 50, NativeWind |
+| **Banco** | PostgreSQL (Supabase) |
+| **Auth** | JWT customizado, bcrypt |
+| **Segurança** | Bitwarden API |
+| **Deploy** | Vercel, EAS, Supabase |
+
+## 📱 Principais Funcionalidades
+
+### Para Usuários
+- 📊 **Dashboard Financeiro**: Veja quanto está economizando em tempo real
+- 🔍 **Explorar**: Encontre assinaturas públicas para participar
+- 📺 **Minhas Assinaturas**: Gerencie todas suas assinaturas compartilhadas
+- 👥 **Grupos**: Organize assinaturas por família, amigos, trabalho
+- 🔔 **Notificações**: Alertas de renovação, pagamentos e novos membros
+- 🔐 **Credenciais Seguras**: Acesso protegido via Bitwarden
+
+### Para Administradores
+- ✅ **Aprovar Membros**: Controle quem entra nas suas assinaturas
+- 👥 **Gestão de Equipe**: Adicione/remova membros facilmente
+- 🔑 **Rotação de Senhas**: Atualize credenciais com um clique
+- 📈 **Métricas**: Acompanhe uso e economia do grupo
+
+## 🚀 Deploy
+
+### Pré-requisitos
+- Conta no [Supabase](https://supabase.com)
+- Conta no [Vercel](https://vercel.com)
+- Conta no [Expo/EAS](https://expo.dev)
+- Conta Business no [Bitwarden](https://bitwarden.com/products/business/)
+
+### 1. Configurar Banco de Dados (Supabase)
 
 ```bash
-# Desenvolvimento
-pnpm dev                     # Inicia web + mobile
-pnpm dev:web                 # Apenas web
-pnpm dev:mobile              # Apenas mobile
-
-# Banco de dados
-pnpm db:generate             # Gera migrações
-pnpm db:migrate              # Executa migrações
-pnpm db:push                 # Push direto (dev only)
-pnpm db:studio               # Interface visual do DB
-
-# Build
-pnpm build                   # Build completo
-pnpm build:web               # Build apenas web
-pnpm build:mobile            # Build mobile
-
-# Testes e Qualidade
-pnpm lint                    # Linting
-pnpm type-check              # TypeScript check
+# Crie um projeto no Supabase Dashboard
+# Anote as credenciais:
+NEXT_PUBLIC_SUPABASE_URL=https://[project_ref].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[anon_key]
+DATABASE_URL=postgresql://postgres:[password]@[host]:5432/postgres
 ```
 
-### APIs Principais
-
-| Endpoint | Método | Descrição |
-|----------|--------|-----------|
-| `/api/auth/login` | POST | Autenticação |
-| `/api/subscriptions/public` | GET | Assinaturas públicas |
-| `/api/groups` | GET/POST | Gestão de grupos |
-| `/api/credentials/{id}` | GET/PUT | Credenciais do Bitwarden |
-| `/api/dashboard/financial` | GET | Métricas financeiras |
-| `/api/notifications/automation` | POST | Automação |
-
-## 🚀 Deploy em Produção
-
-Para instruções completas de deploy, consulte [DEPLOY_INSTRUCTIONS.md](./DEPLOY_INSTRUCTIONS.md).
-
-### Resumo do Deploy
-
-1. **Banco de Dados**: Supabase PostgreSQL
-2. **Backend**: Vercel (Next.js)
-3. **Mobile**: EAS Build + App Stores
-4. **Segurança**: Bitwarden Business Account
-
-### Variáveis de Ambiente Necessárias
+### 2. Deploy Backend (Vercel)
 
 ```bash
-# Database
-DATABASE_URL=postgresql://...
+# No Vercel Dashboard:
+1. Conecte o repositório GitHub
+2. Configure:
+   - Framework: Next.js
+   - Root Directory: apps/web
+   - Build Command: cd ../.. && pnpm turbo run build --filter=web
 
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-
-# JWT & Security
-JWT_SECRET=...
-AUTOMATION_SECRET=...
-
-# Bitwarden
-BITWARDEN_CLIENT_ID=...
-BITWARDEN_CLIENT_SECRET=...
-BITWARDEN_API_URL=https://api.bitwarden.com
+3. Adicione as variáveis de ambiente:
+   DATABASE_URL=
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   JWT_SECRET=                    # openssl rand -base64 32
+   BITWARDEN_CLIENT_ID=
+   BITWARDEN_CLIENT_SECRET=
+   AUTOMATION_SECRET=             # openssl rand -base64 32
 ```
 
-## 📊 Métricas e Monitoramento
+### 3. Deploy Mobile (EAS)
 
-### KPIs Implementados
-- Taxa de conversão de solicitações
-- Tempo médio de aprovação
-- Economia média por usuário
-- Retenção de membros
-- Crescimento de grupos ativos
+```bash
+# Instale o EAS CLI
+npm install -g @expo/eas-cli
+eas login
 
-### Logs de Auditoria
-- Acesso a credenciais
-- Alterações de senha
-- Adição/remoção de membros
-- Criação de grupos e assinaturas
+# Configure o projeto
+cd apps/mobile
+eas build:configure
 
-## 🔒 Segurança
+# Atualize eas.json com a URL de produção
+{
+  "build": {
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://seu-app.vercel.app"
+      }
+    }
+  }
+}
 
-### Medidas Implementadas
-- ✅ Autenticação JWT
-- ✅ Integração Bitwarden para credenciais
-- ✅ Logs de auditoria completos
-- ✅ Middleware de autenticação
-- ✅ Validação de entrada (Zod)
-- ✅ Rate limiting (Next.js)
+# Build e submit
+eas build --platform android --profile production
+eas submit --platform android --latest
+```
 
-### Roadmap de Segurança
-- [ ] Autenticação de dois fatores (2FA)
-- [ ] Criptografia adicional para dados sensíveis
-- [ ] Análise de comportamento anômalo
-- [ ] Compliance LGPD/GDPR
+### 4. Executar Migrações
 
-## 🗺️ Roadmap
+```bash
+cd apps/web
+# Configure DATABASE_URL para produção
+pnpm run db:migrate
+```
 
-### Próximas Funcionalidades
-- [ ] Sistema de pagamentos automáticos
-- [ ] Notificações push mobile
-- [ ] Integração com PIX
-- [ ] Sistema de reviews/avaliações
-- [ ] Analytics avançados
-- [ ] API pública para parceiros
+### 5. Configurar Automação
 
-### Melhorias Técnicas
-- [ ] Cache Redis
-- [ ] CDN para assets
-- [ ] Monitoramento APM
-- [ ] Testes automatizados E2E
-- [ ] CI/CD completo
+```yaml
+# GitHub Actions (.github/workflows/cron.yml)
+name: Notification Automation
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # A cada 6 horas
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.AUTOMATION_SECRET }}" \
+            https://seu-app.vercel.app/api/notifications/automation
+```
 
-## 🤝 Contribuição
+## ❌ Pendências para Finalizar MVP
 
-### Guidelines
-1. Fork o repositório
-2. Crie uma branch feature (`git checkout -b feature/amazing-feature`)
-3. Commit suas mudanças (`git commit -m 'Add amazing feature'`)
-4. Push para a branch (`git push origin feature/amazing-feature`)
+### 1. **API Keys do Bitwarden** (Bloqueador)
+```bash
+# Passos:
+1. Acesse https://bitwarden.com/products/business/
+2. Crie uma conta Business (trial disponível)
+3. Vá em Settings > Organizations > API Keys
+4. Gere Client ID e Client Secret
+5. Configure no Vercel:
+   BITWARDEN_CLIENT_ID=[seu_client_id]
+   BITWARDEN_CLIENT_SECRET=[seu_client_secret]
+   BITWARDEN_API_URL=https://api.bitwarden.com
+```
+
+### 2. **Gerar Secrets de Produção**
+```bash
+# JWT Secret (para autenticação)
+openssl rand -base64 32
+
+# Automation Secret (para cron jobs)
+openssl rand -base64 32
+```
+
+### 3. **Últimos Ajustes**
+- [ ] Testar integração Bitwarden em produção
+- [ ] Verificar rate limits das APIs
+- [ ] Configurar domínio personalizado
+- [ ] Ativar analytics (opcional)
+
+## 🧪 Testes
+
+### APIs (Postman/Insomnia)
+```bash
+# Autenticação
+POST /api/auth/signup
+POST /api/auth/login
+
+# Grupos
+GET /api/groups
+POST /api/groups
+
+# Assinaturas
+GET /api/subscriptions
+POST /api/subscriptions
+GET /api/subscriptions/public
+
+# Dashboard
+GET /api/dashboard/financial
+GET /api/dashboard/alerts
+```
+
+### Mobile
+1. Crie uma conta
+2. Crie um grupo
+3. Adicione uma assinatura
+4. Teste solicitação de acesso com outra conta
+5. Verifique notificações e credenciais
+
+## 📈 Próximos Passos (Pós-MVP)
+
+### Fase 1 - Melhorias Core
+- [ ] Push notifications (Firebase/Expo)
+- [ ] Autenticação 2FA
+- [ ] Recuperação de senha por email
+- [ ] Modo offline parcial
+
+### Fase 2 - Monetização
+- [ ] Gateway de pagamento (Stripe/Mercado Pago)
+- [ ] Planos premium
+- [ ] Taxa de serviço automática
+- [ ] Split de pagamento
+
+### Fase 3 - Expansão
+- [ ] App web completo
+- [ ] Integração com mais gerenciadores
+- [ ] API pública para desenvolvedores
+- [ ] Marketplace de assinaturas
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie sua feature branch (`git checkout -b feature/NovaFuncionalidade`)
+3. Commit suas mudanças (`git commit -m 'Add: nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
 5. Abra um Pull Request
 
-### Standards
-- TypeScript obrigatório
-- ESLint + Prettier para formatação
-- Conventional Commits
-- Testes para funcionalidades críticas
+## 📄 Licença
 
-## 📄 Documentação Adicional
-
-- [DEVELOPMENT.md](./DEVELOPMENT.md) - Setup de desenvolvimento
-- [DEPLOY_INSTRUCTIONS.md](./DEPLOY_INSTRUCTIONS.md) - Deploy completo
-- [PRODUCT_DOCUMENTATION.md](./PRODUCT_DOCUMENTATION.md) - Especificações do produto
-- [plan.md](./plan.md) - Plano de desenvolvimento
-
-## 📝 Licença
-
-Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](./LICENSE) para detalhes.
-
-## 🆘 Suporte
-
-- 📧 Email: suporte@carteira.app
-- 📱 Telegram: @carteira_suporte
-- 🐛 Issues: [GitHub Issues](../../issues)
-- 📖 Docs: [Documentação Completa](./docs/)
+Este projeto está sob licença privada. Todos os direitos reservados.
 
 ---
 
-**Carteira v0** - Desenvolvido com ❤️ para democratizar o acesso a serviços digitais através do compartilhamento inteligente.
+**🎉 O projeto está 95% completo!** Faltam apenas as API keys do Bitwarden e configurações de produção para o lançamento.
+

@@ -6,7 +6,9 @@
       "Bash(npx tsc:*)",
       "Bash(sed:*)",
       "Bash(rg:*)",
-      "Bash(npm run type-check:*)"
+      "Bash(npm run type-check:*)",
+      "Bash(rm:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
