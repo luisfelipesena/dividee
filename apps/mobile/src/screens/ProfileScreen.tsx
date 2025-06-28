@@ -1,10 +1,12 @@
 import React, { useState } from "react"
 import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useNavigation } from "@react-navigation/native"
 import { useAuth } from "../hooks/useAuth"
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth()
+  const navigation = useNavigation()
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [biometricEnabled, setBiometricEnabled] = useState(false)
 
@@ -45,7 +47,7 @@ export default function ProfileScreen() {
           icon: "👤",
           label: "Editar Perfil",
           type: "action" as const,
-          onPress: () => Alert.alert("Info", "Funcionalidade em desenvolvimento"),
+          onPress: () => navigation.navigate("EditProfile" as never),
         },
         {
           icon: "🔒",
@@ -67,6 +69,12 @@ export default function ProfileScreen() {
         {
           icon: "🔔",
           label: "Notificações",
+          type: "action" as const,
+          onPress: () => navigation.navigate("Notifications" as never),
+        },
+        {
+          icon: "🔔",
+          label: "Ativar Notificações",
           type: "toggle" as const,
           value: notificationsEnabled,
           onToggle: setNotificationsEnabled,

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Alert, Modal, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useNavigation } from "@react-navigation/native"
 import api from "../services/api"
 
 interface Group {
@@ -16,6 +17,7 @@ interface Group {
 }
 
 export default function GroupsScreen() {
+  const navigation = useNavigation()
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -106,7 +108,10 @@ export default function GroupsScreen() {
             {groups.length} grupo{groups.length !== 1 ? "s" : ""}
           </Text>
         </View>
-        <TouchableOpacity className="px-4 py-2 rounded-lg bg-sky-600">
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('CreateGroup' as never)}
+          className="px-4 py-2 rounded-lg bg-sky-600"
+        >
           <Text className="font-medium text-white">+ Novo</Text>
         </TouchableOpacity>
       </View>
@@ -162,7 +167,14 @@ export default function GroupsScreen() {
 
                 {/* Action Buttons */}
                 <View className="space-y-3">
-                  <TouchableOpacity className="py-3 border rounded-lg bg-slate-700 border-sky-600">
+                  <TouchableOpacity 
+                    onPress={() => {
+                      // TODO: Navegar para tela de detalhes do grupo quando implementada
+                      // Na tela de detalhes, adicionar botão para navegar para CreateSubscriptionScreen
+                      // navigation.navigate('GroupDetails', { groupId: group.id } as never)
+                    }}
+                    className="py-3 border rounded-lg bg-slate-700 border-sky-600"
+                  >
                     <Text className="font-medium text-center text-sky-400">Ver Detalhes</Text>
                   </TouchableOpacity>
 
@@ -182,7 +194,10 @@ export default function GroupsScreen() {
             <Text className="mb-6 text-center text-slate-400">
               Crie seu primeiro grupo para começar a compartilhar assinaturas com outras pessoas
             </Text>
-            <TouchableOpacity className="px-6 py-3 rounded-lg bg-sky-600">
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('CreateGroup' as never)}
+              className="px-6 py-3 rounded-lg bg-sky-600"
+            >
               <Text className="font-semibold text-white">Criar Primeiro Grupo</Text>
             </TouchableOpacity>
           </View>

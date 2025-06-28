@@ -8,6 +8,7 @@ import {
   Alert 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import api from '../services/api';
 
 interface Subscription {
@@ -30,6 +31,7 @@ interface Subscription {
 }
 
 export default function SubscriptionsScreen() {
+  const navigation = useNavigation<any>();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -134,9 +136,14 @@ export default function SubscriptionsScreen() {
               const pricePerMember = subscription.totalPrice / subscription.maxMembers;
               
               return (
-                <View key={subscription.id} className="bg-slate-800 rounded-lg p-4">
-                  {/* Header */}
-                  <View className="flex-row justify-between items-start mb-3">
+                <TouchableOpacity 
+                  key={subscription.id} 
+                  onPress={() => navigation.navigate("SubscriptionDetails", { subscriptionId: subscription.id })}
+                  activeOpacity={0.8}
+                >
+                  <View className="bg-slate-800 rounded-lg p-4">
+                    {/* Header */}
+                    <View className="flex-row justify-between items-start mb-3">
                     <View className="flex-1">
                       <Text className="text-lg font-semibold text-white">
                         {subscription.name}
@@ -235,7 +242,10 @@ export default function SubscriptionsScreen() {
                       </Text>
                     </TouchableOpacity>
                     
-                    <TouchableOpacity className="flex-1 bg-slate-700 py-3 rounded-lg border border-sky-600">
+                    <TouchableOpacity 
+                      onPress={() => navigation.navigate("SubscriptionDetails", { subscriptionId: subscription.id })}
+                      className="flex-1 bg-slate-700 py-3 rounded-lg border border-sky-600"
+                    >
                       <Text className="text-sky-400 font-medium text-center">
                         Detalhes
                       </Text>
@@ -258,7 +268,8 @@ export default function SubscriptionsScreen() {
                       </TouchableOpacity>
                     </View>
                   )}
-                </View>
+                  </View>
+                </TouchableOpacity>
               );
             })}
           </View>

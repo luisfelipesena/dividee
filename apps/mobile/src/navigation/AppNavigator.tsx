@@ -13,6 +13,12 @@ import GroupsScreen from "../screens/GroupsScreen"
 import LandingScreen from "../screens/LandingScreen"
 import ProfileScreen from "../screens/ProfileScreen"
 import SubscriptionsScreen from "../screens/SubscriptionsScreen"
+import CreateGroupScreen from "../screens/CreateGroupScreen"
+import CreateSubscriptionScreen from "../screens/CreateSubscriptionScreen"
+import AccessRequestsScreen from "../screens/AccessRequestsScreen"
+import NotificationsScreen from "../screens/NotificationsScreen"
+import SubscriptionDetailsScreen from "../screens/SubscriptionDetailsScreen"
+import EditProfileScreen from "../screens/EditProfileScreen"
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -102,7 +108,15 @@ export default function AppNavigator() {
         }}
       >
         {user ? (
-          <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="Main" component={TabNavigator} options={{ headerShown: false }} />
+            <Stack.Screen name="CreateGroup" component={CreateGroupScreen} options={{ title: "Criar Grupo" }} />
+            <Stack.Screen name="CreateSubscription" component={CreateSubscriptionScreen} options={{ title: "Nova Assinatura" }} />
+            <Stack.Screen name="AccessRequests" component={AccessRequestsScreen} options={{ title: "Solicitações" }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: "Notificações" }} />
+            <Stack.Screen name="SubscriptionDetails" component={SubscriptionDetailsScreen} options={{ title: "Detalhes" }} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: "Editar Perfil" }} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Landing" component={LandingScreen} options={{ headerShown: false }} />

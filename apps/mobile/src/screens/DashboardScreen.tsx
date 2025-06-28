@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
+import { useNavigation } from "@react-navigation/native"
 import { useAuth } from "../hooks/useAuth"
 import api from "../services/api"
 
@@ -40,6 +41,7 @@ interface AlertType {
 }
 
 export default function DashboardScreen() {
+  const navigation = useNavigation()
   const { user } = useAuth()
   const [financialData, setFinancialData] = useState<FinancialData | null>(null)
   const [alerts, setAlerts] = useState<AlertType[]>([])
@@ -233,16 +235,39 @@ export default function DashboardScreen() {
         <View className="p-6 border-t border-slate-700">
           <Text className="mb-4 text-lg font-semibold text-white">⚡ Ações Rápidas</Text>
           <View className="space-y-3">
-            <TouchableOpacity className="p-4 rounded-lg bg-sky-600">
+            <TouchableOpacity 
+              className="p-4 rounded-lg bg-sky-600"
+              onPress={() => navigation.navigate("CreateSubscription" as never)}
+            >
               <Text className="font-medium text-center text-white">+ Nova Assinatura</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="p-4 border rounded-lg bg-slate-700 border-sky-600">
+            <TouchableOpacity 
+              className="p-4 border rounded-lg bg-slate-700 border-sky-600"
+              onPress={() => navigation.navigate("Explore" as never)}
+            >
               <Text className="font-medium text-center text-sky-400">🔍 Explorar Assinaturas</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="p-4 border rounded-lg bg-slate-700 border-sky-600">
+            <TouchableOpacity 
+              className="p-4 border rounded-lg bg-slate-700 border-sky-600"
+              onPress={() => navigation.navigate("CreateGroup" as never)}
+            >
               <Text className="font-medium text-center text-sky-400">+ Novo Grupo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="p-4 border rounded-lg bg-slate-700 border-sky-600"
+              onPress={() => navigation.navigate("Notifications" as never)}
+            >
+              <Text className="font-medium text-center text-sky-400">🔔 Notificações</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="p-4 border rounded-lg bg-slate-700 border-sky-600"
+              onPress={() => navigation.navigate("AccessRequests" as never)}
+            >
+              <Text className="font-medium text-center text-sky-400">📋 Solicitações</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -255,7 +280,10 @@ export default function DashboardScreen() {
             <Text className="mb-6 text-center text-slate-400">
               Comece explorando assinaturas ou criando seu primeiro grupo
             </Text>
-            <TouchableOpacity className="px-6 py-3 rounded-lg bg-sky-600">
+            <TouchableOpacity 
+              className="px-6 py-3 rounded-lg bg-sky-600"
+              onPress={() => navigation.navigate("Explore" as never)}
+            >
               <Text className="font-semibold text-white">Explorar Agora</Text>
             </TouchableOpacity>
           </View>
