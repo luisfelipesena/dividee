@@ -1,0 +1,43 @@
+# Local Development Setup Guide
+
+Follow these steps to run the project on your local machine.
+
+### 1. Set Up Environment Variables
+
+- Navigate to the `apps/server` directory.
+- Create a `.env` file by copying the example: `cp .env.example .env`.
+- Generate a secure `JWT_SECRET` and add it to the `.env` file. You can use `openssl rand -base64 32` to generate one.
+
+### 2. Start the Database
+
+From the project root, run:
+
+```bash
+docker-compose up -d
+```
+
+### 3. Run Database Migrations
+
+From the project root, run:
+
+```bash
+pnpm --filter server db:migrate
+```
+
+### 4. Run the Development Servers
+
+You will need two separate terminal windows.
+
+- **Terminal 1 (Backend):**
+  ```bash
+  pnpm --filter server dev
+  ```
+- **Terminal 2 (Mobile):**
+  `bash
+  pnpm --filter mobile start
+  `
+  description:
+  globs:
+  alwaysApply: false
+
+---

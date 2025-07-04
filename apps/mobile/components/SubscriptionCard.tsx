@@ -1,10 +1,10 @@
+import { Subscription } from '@monorepo/types';
 import React from 'react';
-import { View as DefaultView, Text, StyleSheet, Image } from 'react-native';
+import { View as DefaultView, Image, StyleSheet, Text } from 'react-native';
 
 import { View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Subscription } from '@monorepo/types';
 
 interface SubscriptionCardProps {
   subscription: Subscription;

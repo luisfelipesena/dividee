@@ -1,0 +1,12 @@
+# Server-Side Routing
+
+The server uses an Express router with a feature-based structure.
+
+The main router file is [`apps/server/src/routes.ts`](mdc:apps/server/src/routes.ts). This file imports and mounts the feature-specific routers.
+
+## Feature Routers
+
+- **Authentication**: Handled in [`apps/server/src/routes/auth.routes.ts`](mdc:apps/server/src/routes/auth.routes.ts).
+- **Subscriptions**: Handled in [`apps/server/src/routes/subscriptions.routes.ts`](mdc:apps/server/src/routes/subscriptions.routes.ts).
+
+When adding new endpoints, please follow this pattern by either adding to an existing feature router or creating a new one for a new feature.

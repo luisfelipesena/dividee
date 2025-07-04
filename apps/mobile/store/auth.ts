@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+
 import { api } from '@/lib/api';
 
 interface AuthState {
@@ -19,4 +20,4 @@ export const useAuthStore = create<AuthState>((set) => ({
     delete api.defaults.headers.common['Authorization'];
     set({ token: null, isAuthenticated: false });
   },
-})); 
+}));

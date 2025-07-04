@@ -1,0 +1,17 @@
+# Monorepo Structure Guide
+
+This is a pnpm monorepo. The structure is managed by [`pnpm-workspace.yaml`](mdc:pnpm-workspace.yaml).
+
+## Applications (`apps/`)
+
+The `apps` directory contains the deployable applications:
+
+- **`apps/mobile`**: The React Native/Expo mobile application for users.
+- **`apps/server`**: The Express.js backend server that provides the API for the mobile app.
+- **`apps/web`**: A placeholder Next.js application for a future web interface.
+
+## Shared Packages (`packages/`)
+
+The `packages` directory contains code shared across the applications:
+
+- **`packages/types`**: Shared TypeScript types and interfaces, ensuring consistency between the server and client applications.
