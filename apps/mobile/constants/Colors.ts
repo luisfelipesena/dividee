@@ -46,36 +46,39 @@ export default {
 
     // Old compatibility
     tint: '#6366F1',
+    surfaceLight: '#F3F4F6',
   },
   dark: {
     // Primary colors
-    primary: '#818CF8',
+    primary: '#4f46e5',
     primaryLight: '#A5B4FC',
     primaryDark: '#6366F1',
 
     // Secondary colors
-    secondary: '#34D399',
+    secondary: '#10b981',
     secondaryLight: '#6EE7B7',
     secondaryDark: '#10B981',
 
     // Background colors
-    background: '#111827',
-    surface: '#1F2937',
-    card: '#1F2937',
+    background: '#0D1117',
+    surface: '#161B22',
+    card: '#161B22',
+    cardSecondary: '#21262d',
 
     // Text colors
-    text: '#F9FAFB',
-    textSecondary: '#9CA3AF',
+    text: '#c9d1d9',
+    textSecondary: '#8b949e',
     textTertiary: '#6B7280',
     textInverse: '#111827',
 
     // Border colors
-    border: '#374151',
+    border: '#30363d',
 
     // Status colors
     success: '#34D399',
     warning: '#FBBF24',
     error: '#F87171',
+    danger: '#f85149',
     info: '#60A5FA',
 
     // Tab colors
@@ -91,5 +94,6 @@ export default {
 
     // Old compatibility
     tint: '#818CF8',
+    surfaceLight: '#1F2937',
   },
 };

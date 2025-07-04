@@ -115,6 +115,22 @@ export const payments = pgTable('payments', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Expenses table
+export const expenses = pgTable('expenses', {
+  id: serial('id').primaryKey(),
+  subscriptionId: integer('subscription_id')
+    .references(() => subscriptions.id)
+    .notNull(),
+  userId: integer('user_id')
+    .references(() => users.id)
+    .notNull(),
+  description: text('description').notNull(),
+  amount: integer('amount').notNull(), // in cents
+  category: varchar('category', { length: 100 }),
+  date: timestamp('date').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   usersToSubscriptions: many(usersToSubscriptions),
@@ -123,6 +139,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   ownedSubscriptions: many(subscriptions),
   invitations: many(invitations),
   payments: many(payments),
+  expenses: many(expenses),
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({
@@ -147,6 +164,7 @@ export const subscriptionsRelations = relations(subscriptions, ({ one, many }) =
   usersToSubscriptions: many(usersToSubscriptions),
   invitations: many(invitations),
   payments: many(payments),
+  expenses: many(expenses),
 }));
 
 export const usersToSubscriptionsRelations = relations(
@@ -199,6 +217,17 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
   subscription: one(subscriptions, {
     fields: [payments.subscriptionId],
+    references: [subscriptions.id],
+  }),
+}));
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  user: one(users, {
+    fields: [expenses.userId],
+    references: [users.id],
+  }),
+  subscription: one(subscriptions, {
+    fields: [expenses.subscriptionId],
     references: [subscriptions.id],
   }),
 })); 

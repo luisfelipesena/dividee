@@ -7,6 +7,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 
 import SubscriptionCard from '@/components/SubscriptionCard';
@@ -117,7 +118,6 @@ export default function TabHomeScreen() {
           <SubscriptionCard
             subscription={item}
             onPress={() => handleSubscriptionPress(item)}
-            showActions
           />
         )}
         keyExtractor={(item) => item.id.toString()}
@@ -136,14 +136,14 @@ export default function TabHomeScreen() {
         ListEmptyComponent={EmptyComponent}
       />
 
-      {/* FAB for creating subscriptions - to be implemented */}
-      {/*<TouchableOpacity
+      {/* FAB for creating subscriptions */}
+      <TouchableOpacity
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={() => router.push('/create-subscription')}
         activeOpacity={0.8}
       >
-        <FontAwesome name="plus" size={24} color={colors.textInverse} />
-      </TouchableOpacity>*/}
+        <FontAwesome name="plus" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }

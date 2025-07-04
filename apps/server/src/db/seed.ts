@@ -1,9 +1,19 @@
 import * as bcrypt from 'bcryptjs';
 import { db } from './index';
-import { groups, subscriptions, users, usersToGroups, usersToSubscriptions } from './schema';
+import { expenses, groups, subscriptions, users, usersToGroups, usersToSubscriptions } from './schema';
 
 async function main() {
   console.log('🌱 Starting database seed...');
+
+  // Clear existing data (be careful in production!)
+  await db.delete(expenses);
+  await db.delete(usersToSubscriptions);
+  await db.delete(usersToGroups);
+  await db.delete(subscriptions);
+  await db.delete(groups);
+  await db.delete(users);
+  
+  console.log('🧹 Cleared existing data');
 
   // Create users
   const hashedPassword = await bcrypt.hash('123456', 10);
@@ -141,6 +151,52 @@ async function main() {
   ]);
 
   console.log('✅ Users added to subscriptions');
+
+  // Create sample expenses
+  await db.insert(expenses).values([
+    {
+      subscriptionId: netflix.id,
+      userId: user1.id,
+      description: 'Renovação mensal Netflix',
+      amount: 4490, // R$ 44.90 in cents
+      category: 'Renovação',
+      date: new Date('2024-01-15'),
+    },
+    {
+      subscriptionId: spotify.id,
+      userId: user1.id,
+      description: 'Upgrade para Premium',
+      amount: 1000, // R$ 10.00 in cents
+      category: 'Upgrade',
+      date: new Date('2024-01-20'),
+    },
+    {
+      subscriptionId: disneyPlus.id,
+      userId: user2.id,
+      description: 'Taxa de cancelamento',
+      amount: 500, // R$ 5.00 in cents
+      category: 'Multa',
+      date: new Date('2024-01-25'),
+    },
+    {
+      subscriptionId: amazonPrime.id,
+      userId: user3.id,
+      description: 'Renovação anual',
+      amount: 1990, // R$ 19.90 in cents
+      category: 'Renovação',
+      date: new Date('2024-02-01'),
+    },
+    {
+      subscriptionId: youtube.id,
+      userId: user4.id,
+      description: 'Taxa extra por dispositivo',
+      amount: 799, // R$ 7.99 in cents
+      category: 'Taxa Extra',
+      date: new Date('2024-02-05'),
+    },
+  ]);
+
+  console.log('✅ Sample expenses created');
 
   console.log('🎉 Database seed completed successfully!');
   

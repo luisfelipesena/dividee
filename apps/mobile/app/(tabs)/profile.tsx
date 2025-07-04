@@ -7,10 +7,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
-import { View } from '@/components/Themed';
-import { Button, Card } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useUserProfile, useUserStats } from '@/hooks/useUser';
@@ -48,49 +48,43 @@ export default function TabProfileScreen() {
     {
       icon: 'users',
       title: 'Meus Grupos',
-      subtitle: 'Gerencie seus grupos',
-      onPress: () => console.log('Navigate to groups'),
+      onPress: () => router.push('/groups'),
     },
     {
       icon: 'bell',
       title: 'Notificações',
-      subtitle: 'Configure suas preferências',
       onPress: () => console.log('Navigate to notifications'),
     },
     {
       icon: 'lock',
       title: 'Segurança',
-      subtitle: 'Senha e autenticação',
       onPress: () => console.log('Navigate to security'),
     },
     {
       icon: 'question-circle',
       title: 'Ajuda e Suporte',
-      subtitle: 'FAQ e contato',
       onPress: () => console.log('Navigate to help'),
     },
     {
       icon: 'info-circle',
       title: 'Sobre',
-      subtitle: 'Versão e informações',
       onPress: () => console.log('Navigate to about'),
     },
   ];
 
+  const iconColors = ['#4f46e5', '#10b981', '#3b82f6', '#f59e0b', '#6b7280'];
+
   if (profileLoading) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-          Carregando perfil...
-        </Text>
       </View>
     );
   }
 
   if (profileError) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: colors.background }]}>
         <FontAwesome name="exclamation-circle" size={48} color={colors.error} />
         <Text style={[styles.errorText, { color: colors.text }]}>
           Erro ao carregar perfil
@@ -109,11 +103,16 @@ export default function TabProfileScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
+      stickyHeaderIndices={[0]}
     >
-      {/* Profile Header */}
       <View style={styles.header}>
-        <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-          <FontAwesome name="user" size={48} color={colors.textInverse} />
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Perfil</Text>
+      </View>
+      <View style={styles.profileHeader}>
+        <View style={styles.avatarContainer}>
+          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            <FontAwesome name="user" size={32} color="white" />
+          </View>
         </View>
         <Text style={[styles.name, { color: colors.text }]}>
           {userProfile?.fullName || 'Carregando...'}
@@ -123,39 +122,26 @@ export default function TabProfileScreen() {
         </Text>
       </View>
 
-      {/* Stats Cards */}
-      <View style={styles.statsContainer}>
-        <Card variant="filled" style={styles.statCard}>
-          {statsLoading ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <>
-              <Text style={[styles.statValue, { color: colors.primary }]}>
-                {userStats?.subscriptionCount || 0}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Assinaturas
-              </Text>
-            </>
-          )}
-        </Card>
-        <Card variant="filled" style={styles.statCard}>
-          {statsLoading ? (
-            <ActivityIndicator size="small" color={colors.secondary} />
-          ) : (
-            <>
-              <Text style={[styles.statValue, { color: colors.secondary }]}>
-                R$ {userStats?.totalSavings?.toFixed(2) || '0.00'}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Economia Total
-              </Text>
-            </>
-          )}
-        </Card>
+      <View style={[styles.statsCard, { backgroundColor: colors.card }]}>
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: colors.text }]}>
+            {userStats?.subscriptionCount || 0}
+          </Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+            Assinaturas
+          </Text>
+        </View>
+        <View style={styles.statSeparator} />
+        <View style={styles.statItem}>
+          <Text style={[styles.statValue, { color: colors.primary }]}>
+            R$ {userStats?.totalSavings?.toFixed(2) || '0.00'}
+          </Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+            Economia Total
+          </Text>
+        </View>
       </View>
 
-      {/* Member Since */}
       <View style={styles.memberInfo}>
         <FontAwesome name="calendar" size={16} color={colors.textSecondary} />
         <Text style={[styles.memberText, { color: colors.textSecondary }]}>
@@ -169,8 +155,7 @@ export default function TabProfileScreen() {
         </Text>
       </View>
 
-      {/* Menu Items */}
-      <Card style={styles.menuContainer}>
+      <View style={[styles.menuContainer, { backgroundColor: colors.card }]}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
@@ -185,41 +170,36 @@ export default function TabProfileScreen() {
             <View
               style={[
                 styles.menuIcon,
-                { backgroundColor: colors.primary + '20' },
+                { backgroundColor: `${iconColors[index]}33` },
               ]}
             >
               <FontAwesome
                 name={item.icon as any}
                 size={18}
-                color={colors.primary}
+                color={iconColors[index]}
               />
             </View>
-            <View style={styles.menuContent}>
-              <Text style={[styles.menuTitle, { color: colors.text }]}>
-                {item.title}
-              </Text>
-            </View>
+            <Text style={[styles.menuTitle, { color: colors.text }]}>
+              {item.title}
+            </Text>
             <FontAwesome
               name="chevron-right"
               size={16}
-              color={colors.textTertiary}
+              color={colors.textSecondary}
             />
           </TouchableOpacity>
         ))}
-      </Card>
+      </View>
 
-      {/* Logout Button */}
       <View style={styles.logoutContainer}>
         <Button
           title="Sair da Conta"
           onPress={handleLogout}
           variant="danger"
-          fullWidth
           icon="sign-out"
         />
       </View>
 
-      {/* Version Info */}
       <Text style={[styles.version, { color: colors.textTertiary }]}>
         Versão 1.0.0
       </Text>
@@ -237,55 +217,72 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-  },
   errorText: {
     fontSize: 18,
     fontWeight: '600',
     marginTop: 16,
   },
   header: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  profileHeader: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#ffffff1a',
     marginBottom: 16,
   },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   name: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   email: {
     fontSize: 16,
   },
-  statsContainer: {
+  statsCard: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginTop: -32, // Overlap header
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 20,
+    justifyContent: 'space-around',
+    marginHorizontal: 24,
     borderRadius: 16,
+    paddingVertical: 20,
+  },
+  statItem: {
+    alignItems: 'center',
   },
   statValue: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 14,
+  },
+  statSeparator: {
+    width: 1,
+    height: '60%',
+    backgroundColor: '#30363d',
+    alignSelf: 'center',
   },
   memberInfo: {
     flexDirection: 'row',
@@ -298,39 +295,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   menuContainer: {
-    marginHorizontal: 16,
-    padding: 0, // Remove card padding
+    marginHorizontal: 24,
+    borderRadius: 16,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    padding: 16,
     borderBottomWidth: 1,
   },
   menuIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
-  menuContent: {
-    flex: 1,
-  },
   menuTitle: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '500',
   },
   logoutContainer: {
-    margin: 16,
+    marginHorizontal: 24,
     marginTop: 24,
   },
   version: {
     textAlign: 'center',
     fontSize: 12,
-    marginVertical: 16,
+    marginTop: 24,
     marginBottom: 32,
   },
 });

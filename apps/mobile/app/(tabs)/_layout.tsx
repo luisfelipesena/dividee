@@ -52,7 +52,9 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Explorar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="compass" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="compass" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -65,6 +67,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
+          headerShown: false,
           title: 'Perfil',
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}

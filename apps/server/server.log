@@ -1,0 +1,105 @@
+Debugger listening on ws://127.0.0.1:54105/12bdb206-b525-4bde-85b7-39529041f1a3
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+
+> server@1.0.0 dev /Users/luisfelipesena/Development/Personal/dividee/apps/server
+> tsx --watch src/index.ts
+
+Debugger listening on ws://127.0.0.1:54113/d53e0053-4a99-49d1-98a6-cfb238cc4c0c
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+(node:43154) ExperimentalWarning: Watch mode is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Debugger listening on ws://127.0.0.1:54116/47f5f6af-4824-4505-89a4-d0b8bcfa8496
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54423/09289353-b21d-499f-864a-ba5937427ba3
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54495/053b95f3-d1e2-483c-ace7-f161e2d7be16
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54548/2ae93bdb-f175-48b5-8b8c-8b4b712ad93b
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54616/020ea663-589c-49f1-b4ad-490294bff09c
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54697/6b89a763-389c-450d-ad36-22c1bb14a10b
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54783/32084539-6e44-441a-a184-7cb9a2bee8ae
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Waiting for the debugger to disconnect...
+node:internal/modules/cjs/loader:1144
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '../types/express'
+Require stack:
+- /Users/luisfelipesena/Development/Personal/dividee/apps/server/src/middleware/auth.ts
+- /Users/luisfelipesena/Development/Personal/dividee/apps/server/src/routes/auth.routes.ts
+- /Users/luisfelipesena/Development/Personal/dividee/apps/server/src/routes.ts
+- /Users/luisfelipesena/Development/Personal/dividee/apps/server/src/index.ts
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
+    at nextResolveSimple (/Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+    at /Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+    at /Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (/Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+    at /Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+    at m._resolveFilename (file:///Users/luisfelipesena/Development/Personal/dividee/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at Module._load (node:internal/modules/cjs/loader:985:27)
+    at Module.require (node:internal/modules/cjs/loader:1235:19)
+    at require (node:internal/modules/helpers:176:18) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/luisfelipesena/Development/Personal/dividee/apps/server/src/middleware/auth.ts',
+    '/Users/luisfelipesena/Development/Personal/dividee/apps/server/src/routes/auth.routes.ts',
+    '/Users/luisfelipesena/Development/Personal/dividee/apps/server/src/routes.ts',
+    '/Users/luisfelipesena/Development/Personal/dividee/apps/server/src/index.ts'
+  ]
+}
+
+Node.js v20.11.0
+Failed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54856/605cb9b1-ee7c-4a35-bd6f-5afcf3f07266
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Restarting 'src/index.ts'
+Debugger listening on ws://127.0.0.1:54880/0effa2be-7091-4a8b-a89f-56fccabdebfe
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Server is running on http://localhost:3333
+Waiting for the debugger to disconnect...
+Completed running 'src/index.ts'
+Waiting for the debugger to disconnect...
+Waiting for the debugger to disconnect...

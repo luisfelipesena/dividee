@@ -1,12 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { db } from '../db';
+import { users } from '../db/schema';
+import { eq } from 'drizzle-orm';
 
-interface AuthRequest extends Request {
-  user?: { id: number };
-}
-
-export function authMiddleware(
-  req: AuthRequest,
+export async function authMiddleware(
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
@@ -28,12 +27,31 @@ export function authMiddleware(
     return res.status(401).json({ message: 'Token malformatado' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err, decoded: any) => {
-    if (err) {
-      return res.status(401).json({ message: 'Token inválido' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    
+    // Buscar informações completas do usuário
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, decoded.id),
+      columns: {
+        id: true,
+        fullName: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'Usuário não encontrado' });
     }
 
-    req.user = { id: decoded.id };
+    req.user = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+    };
+
     return next();
-  });
+  } catch (err) {
+    return res.status(401).json({ message: 'Token inválido' });
+  }
 } 

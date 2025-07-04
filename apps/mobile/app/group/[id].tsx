@@ -207,18 +207,44 @@ export default function GroupDetailScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Assinaturas ({group.subscriptions?.length || 0})
           </Text>
-          <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: colors.primary }]}
-            onPress={() =>
-              router.push({
-                pathname: '/create-subscription',
-                params: { groupId: groupId.toString() },
-              })
-            }
-          >
-            <FontAwesome name="plus" size={16} color="white" />
-            <Text style={styles.addButtonText}>Adicionar</Text>
-          </TouchableOpacity>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.smallButton, { backgroundColor: colors.info }]}
+              onPress={() =>
+                router.push({
+                  pathname: '/group-expenses/[id]',
+                  params: { id: groupId.toString() }
+                })
+              }
+            >
+              <FontAwesome name="bar-chart" size={14} color="white" />
+              <Text style={styles.smallButtonText}>Despesas</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.smallButton, { backgroundColor: colors.secondary }]}
+              onPress={() =>
+                router.push({
+                  pathname: '/add-expense',
+                  params: { groupId: groupId.toString() }
+                })
+              }
+            >
+              <FontAwesome name="plus" size={14} color="white" />
+              <Text style={styles.smallButtonText}>Gasto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.smallButton, { backgroundColor: colors.primary }]}
+              onPress={() =>
+                router.push({
+                  pathname: '/create-subscription',
+                  params: { groupId: groupId.toString() },
+                })
+              }
+            >
+              <FontAwesome name="plus" size={14} color="white" />
+              <Text style={styles.smallButtonText}>Assinatura</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <FlatList
@@ -286,6 +312,23 @@ const styles = StyleSheet.create({
   inviteButtonText: {
     color: 'white',
     fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  smallButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  smallButtonText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
   },

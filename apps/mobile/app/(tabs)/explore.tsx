@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Subscription } from '@monorepo/types';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -7,6 +8,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -18,9 +20,11 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import {
   useJoinSubscription,
   usePublicSubscriptions,
+  useSubscriptions,
 } from '@/hooks/useSubscriptions';
 
 export default function TabExploreScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -32,9 +36,14 @@ export default function TabExploreScreen() {
     isRefetching,
   } = usePublicSubscriptions();
 
+  const { data: mySubscriptions } = useSubscriptions();
+
   const joinMutation = useJoinSubscription();
 
-  const handleJoinSubscription = (subscription: Subscription) => {
+  const handleJoinSubscription = (subscriptionId: number) => {
+    const subscription = subscriptions?.find((s) => s.id === subscriptionId);
+    if (!subscription) return;
+
     const costPerPerson = subscription.cost / (subscription.members + 1);
 
     Alert.alert(
@@ -79,21 +88,16 @@ export default function TabExploreScreen() {
   }
 
   const renderItem = ({ item }: { item: Subscription }) => {
-    const isFull = item.members >= item.maxMembers;
+    const isMember = mySubscriptions?.some((s) => s.id === item.id) ?? false;
 
     return (
-      <View style={styles.cardContainer}>
-        <SubscriptionCard subscription={item} />
-        <Button
-          title={isFull ? 'Assinatura Cheia' : 'Entrar'}
-          onPress={() => handleJoinSubscription(item)}
-          disabled={isFull || joinMutation.isPending}
-          variant={isFull ? 'outline' : 'primary'}
-          fullWidth
-          style={styles.joinButton}
-          icon="sign-in"
-        />
-      </View>
+      <SubscriptionCard
+        subscription={item}
+        onJoin={handleJoinSubscription}
+        isJoining={joinMutation.isPending && joinMutation.variables === item.id}
+        isMember={isMember}
+        showActions={true}
+      />
     );
   };
 
@@ -106,11 +110,31 @@ export default function TabExploreScreen() {
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         Volte mais tarde para ver novas oportunidades
       </Text>
+      <Button
+        title="Ver Meus Grupos"
+        onPress={() => router.push('/groups')}
+        variant="primary"
+        style={styles.groupsButton}
+        icon="users"
+      />
     </View>
   );
 
   return (
     <ThemedView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>
+          Explorar Assinaturas
+        </Text>
+        <TouchableOpacity
+          style={[styles.groupsButton, { backgroundColor: colors.primary }]}
+          onPress={() => router.push('/groups')}
+        >
+          <FontAwesome name="users" size={16} color="white" />
+          <Text style={styles.groupsButtonText}>Meus Grupos</Text>
+        </TouchableOpacity>
+      </View>
+      
       <FlatList
         data={subscriptions}
         renderItem={renderItem}
@@ -136,6 +160,24 @@ export default function TabExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  groupsButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   list: {
     paddingTop: 10,
@@ -163,13 +205,6 @@ const styles = StyleSheet.create({
   retryButton: {
     marginTop: 16,
   },
-  cardContainer: {
-    marginBottom: 8,
-  },
-  joinButton: {
-    marginHorizontal: 16,
-    marginTop: -4,
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -186,5 +221,12 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: 16,
     textAlign: 'center',
+  },
+  groupsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
   },
 });

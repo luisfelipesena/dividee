@@ -2,7 +2,22 @@
   "permissions": {
     "allow": [
       "mcp__ide__getDiagnostics",
-      "Bash(pnpm db:seed:*)"
+      "Bash(pnpm db:seed:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm db:migrate:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm server:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(lsof:*)",
+      "Bash(pnpm run:*)",
+      "Bash(true)",
+      "Bash(echo)",
+      "Bash(cat:*)",
+      "Bash(pnpm build:*)",
+      "Bash(PORT=3333 pnpm run dev)"
     ],
     "deny": []
   }

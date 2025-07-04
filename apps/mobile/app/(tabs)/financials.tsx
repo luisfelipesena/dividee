@@ -1,19 +1,23 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useExpenseSummary } from '@/hooks/useExpenses';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 
 export default function TabFinancialsScreen() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
@@ -24,6 +28,12 @@ export default function TabFinancialsScreen() {
     refetch,
     isRefetching,
   } = useSubscriptions();
+
+  const {
+    data: expenseSummary,
+    isLoading: isLoadingExpenses,
+    refetch: refetchExpenses,
+  } = useExpenseSummary();
 
   const calculateFinancials = () => {
     if (!subscriptions || subscriptions.length === 0) {
@@ -82,8 +92,11 @@ export default function TabFinancialsScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       refreshControl={
         <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={refetch}
+          refreshing={isRefetching || isLoadingExpenses}
+          onRefresh={() => {
+            refetch();
+            refetchExpenses();
+          }}
           colors={[colors.primary]}
           tintColor={colors.primary}
         />
@@ -232,6 +245,61 @@ export default function TabFinancialsScreen() {
           })}
       </Card>
 
+      {/* Expenses Summary */}
+      {expenseSummary && (
+        <Card variant="elevated" style={styles.expensesCard}>
+          <View style={styles.expensesHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Resumo de Despesas
+            </Text>
+            <TouchableOpacity
+              style={[styles.addExpenseButton, { backgroundColor: colors.primary }]}
+              onPress={() => router.push('/add-expense')}
+            >
+              <FontAwesome name="plus" size={16} color="white" />
+              <Text style={styles.addExpenseText}>Adicionar</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.expensesStats}>
+            <View style={styles.expensesStat}>
+              <Text style={[styles.expensesStatLabel, { color: colors.textSecondary }]}>
+                Total em Despesas
+              </Text>
+              <Text style={[styles.expensesStatValue, { color: colors.error }]}>
+                R$ {expenseSummary.totalAmount?.toFixed(2) || '0.00'}
+              </Text>
+            </View>
+            <View style={styles.expensesStat}>
+              <Text style={[styles.expensesStatLabel, { color: colors.textSecondary }]}>
+                Número de Despesas
+              </Text>
+              <Text style={[styles.expensesStatValue, { color: colors.text }]}>
+                {expenseSummary.totalCount || 0}
+              </Text>
+            </View>
+          </View>
+
+          {expenseSummary.byCategory && expenseSummary.byCategory.length > 0 && (
+            <View style={styles.expensesByCategory}>
+              <Text style={[styles.subsectionTitle, { color: colors.text }]}>
+                Por Categoria
+              </Text>
+              {expenseSummary.byCategory.map((category) => (
+                <View key={category.category} style={styles.categoryItem}>
+                  <Text style={[styles.categoryName, { color: colors.text }]}>
+                    {category.category}
+                  </Text>
+                  <Text style={[styles.categoryAmount, { color: colors.text }]}>
+                    R$ {category.totalAmount.toFixed(2)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </Card>
+      )}
+
       {/* Annual Projection */}
       <Card
         variant="filled"
@@ -248,6 +316,15 @@ export default function TabFinancialsScreen() {
           de economia em 12 meses
         </Text>
       </Card>
+
+      {/* FAB for adding expenses */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.secondary }]}
+        onPress={() => router.push('/add-expense')}
+        activeOpacity={0.8}
+      >
+        <FontAwesome name="plus" size={24} color="white" />
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -411,5 +488,85 @@ const styles = StyleSheet.create({
   projectionLabel: {
     fontSize: 14,
     marginTop: 4,
+  },
+  expensesCard: {
+    margin: 16,
+    marginTop: 0,
+  },
+  expensesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addExpenseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  addExpenseText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  expensesStats: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  expensesStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  expensesStatLabel: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  expensesStatValue: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  expensesByCategory: {
+    marginTop: 16,
+  },
+  subsectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#00000010',
+  },
+  categoryName: {
+    fontSize: 14,
+  },
+  categoryAmount: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 90,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
