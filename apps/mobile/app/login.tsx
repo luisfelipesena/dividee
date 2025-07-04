@@ -1,94 +1,137 @@
-import { useAuthStore } from '@/store/auth';
-import { useRouter, Link } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
-import { useMutation } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-const loginUser = async (credentials: any) => {
-  const { data } = await api.post('/auth/login', credentials);
-  return data;
-};
+import { Button, Card, Input } from '@/components/ui';
+import Colors from '@/constants/Colors';
+import { useLogin } from '@/hooks/useAuth';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuthStore();
-  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-  const mutation = useMutation({
-    mutationFn: loginUser,
-    onSuccess: (data) => {
-      login(data.token);
-      router.replace('/(tabs)');
-    },
-    onError: (error) => {
-      Alert.alert('Erro no Login', 'E-mail ou senha inválidos.');
-      console.error(error);
-    },
-  });
+  const loginMutation = useLogin();
 
   const handleLogin = () => {
     if (email && password) {
-      mutation.mutate({ email, password });
+      loginMutation.mutate({ email, password });
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Carteira</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button
-        title={mutation.isPending ? 'Entrando...' : 'Entrar'}
-        onPress={handleLogin}
-        disabled={mutation.isPending}
-      />
-      <Link href="/register" style={styles.link}>
-        <Text style={styles.linkText}>Não tem uma conta? Cadastre-se</Text>
-      </Link>
-    </View>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View
+            style={[styles.logoContainer, { backgroundColor: colors.primary }]}
+          >
+            <FontAwesome
+              name="credit-card"
+              size={48}
+              color={colors.textInverse}
+            />
+          </View>
+          <Text style={[styles.title, { color: colors.text }]}>Carteira</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Economize compartilhando assinaturas
+          </Text>
+        </View>
+
+        <Card variant="filled" style={styles.form}>
+          <Input
+            label="E-mail"
+            placeholder="seu@email.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            leftIcon="envelope"
+          />
+          <Input
+            label="Senha"
+            placeholder="Digite sua senha"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            leftIcon="lock"
+            rightIcon={showPassword ? 'eye-slash' : 'eye'}
+            onRightIconPress={() => setShowPassword(!showPassword)}
+          />
+          <Button
+            title="Entrar"
+            onPress={handleLogin}
+            loading={loginMutation.isPending}
+            fullWidth
+            size="large"
+            icon="sign-in"
+          />
+        </Card>
+
+        <View style={styles.footer}>
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+            Não tem uma conta?
+          </Text>
+          <Link href="/register" asChild>
+            <Button title="Cadastre-se" variant="ghost" size="medium" />
+          </Link>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 16,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center',
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  logoContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 24,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+  title: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
-  link: {
-    marginTop: 16,
+  subtitle: {
+    fontSize: 16,
     textAlign: 'center',
   },
-  linkText: {
-    color: '#2f95dc',
+  form: {
+    marginBottom: 24,
   },
-}); 
+  footer: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+});

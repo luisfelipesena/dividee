@@ -1,100 +1,184 @@
-import { useRouter, Link } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
+import { Link } from 'expo-router';
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
-import { useMutation } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-const registerUser = async (credentials: any) => {
-  const { data } = await api.post('/auth/register', credentials);
-  return data;
-};
+import { Button, Card, Input } from '@/components/ui';
+import Colors from '@/constants/Colors';
+import { useRegister } from '@/hooks/useAuth';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-  const mutation = useMutation({
-    mutationFn: registerUser,
-    onSuccess: () => {
-      Alert.alert('Sucesso!', 'Sua conta foi criada. Faça o login para continuar.');
-      router.push('/login');
-    },
-    onError: (error) => {
-      Alert.alert('Erro no Cadastro', 'Não foi possível criar a conta. Verifique os dados e tente novamente.');
-      console.error(error);
-    },
-  });
+  const registerMutation = useRegister();
 
   const handleRegister = () => {
-    if (fullName && email && password) {
-      mutation.mutate({ fullName, email, password });
+    if (!fullName || !email || !password || !confirmPassword) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
     }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não coincidem.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    registerMutation.mutate({ fullName, email, password });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nome Completo"
-        value={fullName}
-        onChangeText={setFullName}
-        autoCapitalize="words"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Button
-        title={mutation.isPending ? 'Criando...' : 'Criar Conta'}
-        onPress={handleRegister}
-        disabled={mutation.isPending}
-      />
-      <Link href="/login" style={styles.link}>
-        <Text style={styles.linkText}>Já tem uma conta? Faça login</Text>
-      </Link>
-    </View>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <View
+              style={[
+                styles.logoContainer,
+                { backgroundColor: colors.primary },
+              ]}
+            >
+              <FontAwesome
+                name="user-plus"
+                size={48}
+                color={colors.textInverse}
+              />
+            </View>
+            <Text style={[styles.title, { color: colors.text }]}>
+              Criar Conta
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              Junte-se à comunidade Carteira
+            </Text>
+          </View>
+
+          <Card variant="filled" style={styles.form}>
+            <Input
+              label="Nome Completo"
+              placeholder="Seu nome"
+              value={fullName}
+              onChangeText={setFullName}
+              autoCapitalize="words"
+              leftIcon="user"
+            />
+            <Input
+              label="E-mail"
+              placeholder="seu@email.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              leftIcon="envelope"
+            />
+            <Input
+              label="Senha"
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              leftIcon="lock"
+              rightIcon={showPassword ? 'eye-slash' : 'eye'}
+              onRightIconPress={() => setShowPassword(!showPassword)}
+            />
+            <Input
+              label="Confirmar Senha"
+              placeholder="Digite a senha novamente"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showPassword}
+              leftIcon="lock"
+            />
+            <Button
+              title="Criar Conta"
+              onPress={handleRegister}
+              loading={registerMutation.isPending}
+              fullWidth
+              size="large"
+              icon="check"
+            />
+          </Card>
+
+          <View style={styles.footer}>
+            <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+              Já tem uma conta?
+            </Text>
+            <Link href="/login" asChild>
+              <Button title="Fazer Login" variant="ghost" size="medium" />
+            </Link>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 48,
     justifyContent: 'center',
-    padding: 16,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  logoContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
     textAlign: 'center',
+  },
+  form: {
     marginBottom: 24,
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+  footer: {
+    alignItems: 'center',
   },
-  link: {
-    marginTop: 16,
-    textAlign: 'center',
+  footerText: {
+    fontSize: 14,
+    marginBottom: 8,
   },
-  linkText: {
-    color: '#2f95dc',
-  },
-}); 
+});

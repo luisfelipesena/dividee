@@ -16,6 +16,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@monorepo/types": "workspace:*",
+    "@monorepo/env": "workspace:*",
     "@react-navigation/native": "^6.0.2",
     "@tanstack/react-query": "^5.81.5",
     "axios": "^1.10.0",
