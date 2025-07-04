@@ -131,6 +131,16 @@ export const expenses = pgTable('expenses', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+export const expenseParticipants = pgTable('expense_participants', {
+  id: serial('id').primaryKey(),
+  expenseId: integer('expense_id')
+    .notNull()
+    .references(() => expenses.id, { onDelete: 'cascade' }),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   usersToSubscriptions: many(usersToSubscriptions),
@@ -140,6 +150,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   invitations: many(invitations),
   payments: many(payments),
   expenses: many(expenses),
+  expenseParticipations: many(expenseParticipants),
 }));
 
 export const groupsRelations = relations(groups, ({ one, many }) => ({
@@ -150,6 +161,8 @@ export const groupsRelations = relations(groups, ({ one, many }) => ({
   usersToGroups: many(usersToGroups),
   subscriptions: many(subscriptions),
   invitations: many(invitations),
+  payments: many(payments),
+  expenses: many(expenses),
 }));
 
 export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
@@ -221,7 +234,7 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   }),
 }));
 
-export const expensesRelations = relations(expenses, ({ one }) => ({
+export const expensesRelations = relations(expenses, ({ one, many }) => ({
   user: one(users, {
     fields: [expenses.userId],
     references: [users.id],
@@ -230,4 +243,19 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
     fields: [expenses.subscriptionId],
     references: [subscriptions.id],
   }),
-})); 
+  participants: many(expenseParticipants),
+}));
+
+export const expenseParticipantsRelations = relations(
+  expenseParticipants,
+  ({ one }) => ({
+    expense: one(expenses, {
+      fields: [expenseParticipants.expenseId],
+      references: [expenses.id],
+    }),
+    user: one(users, {
+      fields: [expenseParticipants.userId],
+      references: [users.id],
+    }),
+  })
+); 

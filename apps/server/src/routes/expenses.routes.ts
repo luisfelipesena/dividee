@@ -1,7 +1,10 @@
 import { eq } from 'drizzle-orm';
 import { Request, Response, Router } from 'express';
 import { db } from '../db';
-import { expenses, subscriptions, usersToSubscriptions } from '../db/schema';
+import {
+  expenseParticipants,
+  expenses
+} from '../db/schema';
 import { authMiddleware } from '../middleware/auth';
 
 const router = Router();
@@ -9,7 +12,8 @@ router.use(authMiddleware);
 
 // Create a new expense
 router.post('/', async (req: Request, res: Response) => {
-  const { subscriptionId, description, amount, category, date } = req.body;
+  const { subscriptionId, description, amount, category, date, participants } =
+    req.body;
   const userId = req.user!.id;
 
   try {
@@ -20,10 +24,12 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     if (!membership) {
-      return res.status(403).json({ message: 'Você não é membro desta assinatura.' });
+      return res
+        .status(403)
+        .json({ message: 'Você não é membro desta assinatura.' });
     }
 
-    const newExpense = await db
+    const [newExpense] = await db
       .insert(expenses)
       .values({
         subscriptionId,
@@ -35,9 +41,17 @@ router.post('/', async (req: Request, res: Response) => {
       })
       .returning();
 
+    if (participants && participants.length > 0) {
+      const participantData = participants.map((participantId: number) => ({
+        expenseId: newExpense.id,
+        userId: participantId,
+      }));
+      await db.insert(expenseParticipants).values(participantData);
+    }
+
     res.status(201).json({
-      ...newExpense[0],
-      amount: newExpense[0].amount / 100, // Convert back to currency
+      ...newExpense,
+      amount: newExpense.amount / 100, // Convert back to currency
     });
   } catch (error) {
     console.error(error);
@@ -58,7 +72,9 @@ router.get('/subscription/:id', async (req: Request, res: Response) => {
     });
 
     if (!membership) {
-      return res.status(403).json({ message: 'Você não é membro desta assinatura.' });
+      return res
+        .status(403)
+        .json({ message: 'Você não é membro desta assinatura.' });
     }
 
     const subscriptionExpenses = await db.query.expenses.findMany({
@@ -70,6 +86,16 @@ router.get('/subscription/:id', async (req: Request, res: Response) => {
             fullName: true,
           },
         },
+        participants: {
+          with: {
+            user: {
+              columns: {
+                id: true,
+                fullName: true,
+              },
+            },
+          },
+        },
       },
       orderBy: (table, { desc }) => [desc(table.date)],
     });
@@ -77,12 +103,69 @@ router.get('/subscription/:id', async (req: Request, res: Response) => {
     const response = subscriptionExpenses.map((expense) => ({
       ...expense,
       amount: expense.amount / 100, // Convert back to currency
+      participants: expense.participants.map((p) => p.user),
     }));
 
     res.json(response);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erro ao buscar despesas.' });
+  }
+});
+
+// Get expenses for a group
+router.get('/group/:id', async (req: Request, res: Response) => {
+  const groupId = parseInt(req.params.id, 10);
+  const userId = req.user!.id;
+
+  try {
+    // Verify user is a member of the group
+    const groupMembership = await db.query.usersToGroups.findFirst({
+      where: (table, { and, eq }) =>
+        and(eq(table.userId, userId), eq(table.groupId, groupId)),
+    });
+
+    if (!groupMembership) {
+      return res.status(403).json({ message: 'Você não é membro deste grupo.' });
+    }
+
+    // Get all subscription IDs for the group
+    const groupSubscriptions = await db.query.subscriptions.findMany({
+      where: (table, { eq }) => eq(table.groupId, groupId),
+      columns: { id: true },
+    });
+
+    if (groupSubscriptions.length === 0) {
+      return res.json([]);
+    }
+    const subscriptionIds = groupSubscriptions.map((sub) => sub.id);
+
+    // Get all expenses for those subscriptions
+    const groupExpenses = await db.query.expenses.findMany({
+      where: (table, { inArray }) => inArray(table.subscriptionId, subscriptionIds),
+      with: {
+        user: {
+          columns: { id: true, fullName: true },
+        },
+        participants: {
+          with: {
+            user: { columns: { id: true, fullName: true } },
+          },
+        },
+      },
+      orderBy: (table, { desc }) => [desc(table.date)],
+    });
+
+    const response = groupExpenses.map((expense) => ({
+      ...expense,
+      amount: expense.amount / 100,
+      participants: expense.participants.map((p) => p.user),
+    }));
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching group expenses:', error);
+    res.status(500).json({ message: 'Erro ao buscar despesas do grupo.' });
   }
 });
 

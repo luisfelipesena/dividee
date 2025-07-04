@@ -1,4 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { Expense as ExpenseType, Subscription } from '@monorepo/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -14,23 +15,8 @@ import {
 import { Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useSubscriptionExpenses } from '@/hooks/useExpenses';
+import { useGroupExpenses } from '@/hooks/useExpenses';
 import { useGroupDetails } from '@/hooks/useGroups';
-
-interface Expense {
-  id: number;
-  subscriptionId: number;
-  userId: number;
-  description: string;
-  amount: number;
-  category?: string;
-  date: string;
-  createdAt: string;
-  user?: {
-    id: number;
-    fullName: string;
-  };
-}
 
 export default function GroupExpensesScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,28 +27,22 @@ export default function GroupExpensesScreen() {
   const groupId = parseInt(id as string, 10);
   const { data: group } = useGroupDetails(groupId);
 
-  // Get all expenses for subscriptions in this group
-  const subscriptionIds = group?.subscriptions?.map(sub => sub.id) || [];
-  
-  const expenseQueries = subscriptionIds.map(subId => 
-    useSubscriptionExpenses(subId)
-  );
+  const {
+    data: allExpenses = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGroupExpenses(groupId);
 
-  const isLoading = expenseQueries.some(query => query.isLoading);
-  const isError = expenseQueries.some(query => query.isError);
+  const renderExpense = ({ item }: { item: ExpenseType }) => {
+    const subscription = group?.subscriptions?.find(
+      (sub: Subscription) => sub.id === item.subscriptionId
+    );
+    const splitAmount =
+      item.participants && item.participants.length > 0
+        ? item.amount / item.participants.length
+        : item.amount;
 
-  // Combine all expenses from different subscriptions
-  const allExpenses: Expense[] = expenseQueries
-    .flatMap(query => query.data || [])
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  const refetch = () => {
-    expenseQueries.forEach(query => query.refetch());
-  };
-
-  const renderExpense = ({ item }: { item: Expense }) => {
-    const subscription = group?.subscriptions?.find(sub => sub.id === item.subscriptionId);
-    
     return (
       <Card style={styles.expenseCard}>
         <View style={styles.expenseHeader}>
@@ -81,8 +61,20 @@ export default function GroupExpensesScreen() {
             <Text style={[styles.amountValue, { color: colors.error }]}>
               R$ {item.amount.toFixed(2)}
             </Text>
+            {item.participants && item.participants.length > 1 && (
+              <Text
+                style={[styles.splitAmount, { color: colors.textSecondary }]}
+              >
+                (R$ {splitAmount.toFixed(2)} / pessoa)
+              </Text>
+            )}
             {item.category && (
-              <View style={[styles.categoryBadge, { backgroundColor: colors.primary + '20' }]}>
+              <View
+                style={[
+                  styles.categoryBadge,
+                  { backgroundColor: colors.primary + '20' },
+                ]}
+              >
                 <Text style={[styles.categoryText, { color: colors.primary }]}>
                   {item.category}
                 </Text>
@@ -95,31 +87,67 @@ export default function GroupExpensesScreen() {
             {new Date(item.date).toLocaleDateString('pt-BR')}
           </Text>
         </View>
+        {item.participants && item.participants.length > 0 && (
+          <View style={styles.participantsContainer}>
+            <Text
+              style={[
+                styles.participantsTitle,
+                { color: colors.textSecondary },
+              ]}
+            >
+              Participantes:
+            </Text>
+            <View style={styles.participantsList}>
+              {item.participants.map((p, index) => (
+                <Text
+                  key={p.id}
+                  style={[styles.participantName, { color: colors.text }]}
+                >
+                  {p.fullName}
+                  {item.participants && index < item.participants.length - 1
+                    ? ', '
+                    : ''}
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
       </Card>
     );
   };
 
   const calculateSummary = () => {
-    const totalAmount = allExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const expensesByCategory = allExpenses.reduce((acc, expense) => {
-      const category = expense.category || 'Outros';
-      acc[category] = (acc[category] || 0) + expense.amount;
-      return acc;
-    }, {} as Record<string, number>);
+    const totalAmount = allExpenses.reduce(
+      (sum, expense) => sum + expense.amount,
+      0
+    );
+    const expensesByCategory = allExpenses.reduce(
+      (acc, expense) => {
+        const category = expense.category || 'Outros';
+        acc[category] = (acc[category] || 0) + expense.amount;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const expensesByUser = allExpenses.reduce((acc, expense) => {
-      const userName = expense.user?.fullName || 'Usuário desconhecido';
-      acc[userName] = (acc[userName] || 0) + expense.amount;
-      return acc;
-    }, {} as Record<string, number>);
+    const expensesByUser = allExpenses.reduce(
+      (acc, expense) => {
+        const userName = expense.user?.fullName || 'Usuário desconhecido';
+        acc[userName] = (acc[userName] || 0) + expense.amount;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalAmount,
       totalCount: allExpenses.length,
-      byCategory: Object.entries(expensesByCategory).map(([category, amount]) => ({
-        category,
-        amount,
-      })),
+      byCategory: Object.entries(expensesByCategory).map(
+        ([category, amount]) => ({
+          category,
+          amount,
+        })
+      ),
       byUser: Object.entries(expensesByUser).map(([user, amount]) => ({
         user,
         amount,
@@ -149,7 +177,7 @@ export default function GroupExpensesScreen() {
         </Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: colors.primary }]}
-          onPress={refetch}
+          onPress={() => refetch()}
         >
           <Text style={styles.retryButtonText}>Tentar novamente</Text>
         </TouchableOpacity>
@@ -158,11 +186,11 @@ export default function GroupExpensesScreen() {
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       refreshControl={
-        <RefreshControl 
-          refreshing={isLoading} 
+        <RefreshControl
+          refreshing={isLoading}
           onRefresh={refetch}
           colors={[colors.primary]}
           tintColor={colors.primary}
@@ -243,7 +271,7 @@ export default function GroupExpensesScreen() {
         </Text>
         {allExpenses.length > 0 ? (
           <FlatList
-            data={allExpenses}
+            data={allExpenses as ExpenseType[]}
             renderItem={renderExpense}
             keyExtractor={(item) => item.id.toString()}
             scrollEnabled={false}
@@ -262,10 +290,12 @@ export default function GroupExpensesScreen() {
       {/* FAB for adding expense */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: colors.secondary }]}
-        onPress={() => router.push({
-          pathname: '/add-expense',
-          params: { groupId: groupId.toString() }
-        })}
+        onPress={() =>
+          router.push({
+            pathname: '/add-expense',
+            params: { groupId: groupId.toString() },
+          })
+        }
         activeOpacity={0.8}
       >
         <FontAwesome name="plus" size={24} color="white" />
@@ -399,6 +429,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 4,
   },
+  splitAmount: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
   categoryBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -413,6 +447,25 @@ const styles = StyleSheet.create({
   },
   expenseDate: {
     fontSize: 12,
+  },
+  participantsContainer: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#00000010',
+  },
+  participantsTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  participantsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  participantName: {
+    fontSize: 12,
+    marginRight: 4,
   },
   emptyState: {
     alignItems: 'center',

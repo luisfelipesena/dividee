@@ -1,8 +1,15 @@
-export interface User {
+export interface PartialUser {
   id: number;
   fullName: string | null;
+}
+
+export interface User extends PartialUser {
   email: string;
   createdAt: Date;
+}
+
+export interface GroupMember extends User {
+  role: 'admin' | 'member';
 }
 
 export interface Group {
@@ -11,6 +18,8 @@ export interface Group {
   description: string | null;
   ownerId: number;
   createdAt: Date;
+  members?: GroupMember[];
+  subscriptions?: Subscription[];
 }
 
 export interface Subscription {
@@ -32,6 +41,23 @@ export interface Subscription {
   notes?: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Expense {
+  id: number;
+  subscriptionId: number;
+  userId: number;
+  description: string;
+  amount: number;
+  category?: string;
+  date: string;
+  createdAt: string;
+  participants?: PartialUser[];
+  user?: PartialUser;
+  subscription?: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface Payment {

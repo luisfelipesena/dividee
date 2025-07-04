@@ -29,6 +29,13 @@
       "when": 1751661628093,
       "tag": "0003_nice_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751664048738,
+      "tag": "0004_rapid_wendigo",
+      "breakpoints": true
     }
   ]
 }

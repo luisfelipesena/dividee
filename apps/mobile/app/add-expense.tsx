@@ -1,6 +1,7 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -17,6 +18,7 @@ import { Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCreateExpense } from '@/hooks/useExpenses';
+import { useGroupDetails } from '@/hooks/useGroups';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 
 const EXPENSE_CATEGORIES = [
@@ -38,11 +40,6 @@ export default function AddExpenseScreen() {
 
   const createExpenseMutation = useCreateExpense();
   const { data: subscriptions } = useSubscriptions();
-  
-  // Filter subscriptions by group if groupId is provided
-  const filteredSubscriptions = groupId 
-    ? subscriptions?.filter(sub => sub.groupId === parseInt(groupId, 10))
-    : subscriptions;
 
   const [formData, setFormData] = useState({
     subscriptionId: subscriptionId ? parseInt(subscriptionId, 10) : 0,
@@ -50,6 +47,34 @@ export default function AddExpenseScreen() {
     amount: '',
     category: 'Outros',
   });
+  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+
+  const selectedSubscription = subscriptions?.find(
+    (sub) => sub.id === formData.subscriptionId
+  );
+  const currentGroupId =
+    selectedSubscription?.groupId ?? (groupId ? parseInt(groupId) : undefined);
+
+  const { data: groupDetails } = useGroupDetails(currentGroupId as number);
+
+  useEffect(() => {
+    if (groupDetails?.members) {
+      setSelectedMembers(groupDetails.members.map((m) => m.id));
+    }
+  }, [groupDetails]);
+
+  // Filter subscriptions by group if groupId is provided
+  const filteredSubscriptions = groupId
+    ? subscriptions?.filter((sub) => sub.groupId === parseInt(groupId, 10))
+    : subscriptions;
+
+  const handleToggleMember = (memberId: number) => {
+    setSelectedMembers((prev) =>
+      prev.includes(memberId)
+        ? prev.filter((id) => id !== memberId)
+        : [...prev, memberId]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!formData.subscriptionId) {
@@ -67,12 +92,21 @@ export default function AddExpenseScreen() {
       return;
     }
 
+    if (selectedMembers.length === 0) {
+      Alert.alert(
+        'Erro',
+        'Selecione pelo menos um membro para dividir a despesa.'
+      );
+      return;
+    }
+
     try {
       await createExpenseMutation.mutateAsync({
         subscriptionId: formData.subscriptionId,
         description: formData.description.trim(),
         amount: Number(formData.amount),
         category: formData.category,
+        participants: selectedMembers,
       });
       router.back();
     } catch (error) {
@@ -123,6 +157,34 @@ export default function AddExpenseScreen() {
               </Picker>
             </View>
           </View>
+
+          {groupDetails && groupDetails.members && (
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Dividir com
+              </Text>
+              {groupDetails.members.map((member) => (
+                <TouchableOpacity
+                  key={member.id}
+                  style={styles.memberRow}
+                  onPress={() => handleToggleMember(member.id)}
+                >
+                  <FontAwesome
+                    name={
+                      selectedMembers.includes(member.id)
+                        ? 'check-square-o'
+                        : 'square-o'
+                    }
+                    size={24}
+                    color={colors.primary}
+                  />
+                  <Text style={[styles.memberName, { color: colors.text }]}>
+                    {member.fullName}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
           <View style={styles.formGroup}>
             <Text style={[styles.label, { color: colors.text }]}>
@@ -236,7 +298,8 @@ export default function AddExpenseScreen() {
               !formData.subscriptionId ||
               !formData.description.trim() ||
               !formData.amount ||
-              createExpenseMutation.isPending
+              createExpenseMutation.isPending ||
+              selectedMembers.length === 0
             }
           >
             <Text style={styles.createButtonText}>
@@ -297,6 +360,15 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 48,
+  },
+  memberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  memberName: {
+    marginLeft: 12,
+    fontSize: 16,
   },
   infoCard: {
     backgroundColor: '#f8f9fa',

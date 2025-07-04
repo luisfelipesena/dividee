@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Group } from '@monorepo/types';
+import { GroupMember, Subscription } from '@monorepo/types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -18,26 +18,8 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useGroupDetails, useInviteMember } from '@/hooks/useGroups';
 
-interface GroupMember {
-  id: number;
-  fullName: string;
-  email: string;
-  role: 'admin' | 'member';
-}
-
-interface GroupSubscription {
-  id: number;
-  name: string;
-  iconUrl?: string;
-  totalCost: number;
-  maxMembers: number;
-  isPublic: boolean;
+interface GroupSubscription extends Subscription {
   members: number;
-}
-
-interface GroupDetailsResponse extends Group {
-  members: GroupMember[];
-  subscriptions: GroupSubscription[];
 }
 
 export default function GroupDetailScreen() {
@@ -47,17 +29,7 @@ export default function GroupDetailScreen() {
   const colors = Colors[colorScheme ?? 'light'];
 
   const groupId = parseInt(id as string, 10);
-  const {
-    data: group,
-    isLoading,
-    isError,
-    refetch,
-  } = useGroupDetails(groupId) as {
-    data: GroupDetailsResponse | undefined;
-    isLoading: boolean;
-    isError: boolean;
-    refetch: () => void;
-  };
+  const { data: group, isLoading, isError, refetch } = useGroupDetails(groupId);
 
   const inviteMemberMutation = useInviteMember();
 
@@ -118,7 +90,7 @@ export default function GroupDetailScreen() {
             {item.name}
           </Text>
           <Text style={[styles.subscriptionCost, { color: colors.tint }]}>
-            R$ {(item.totalCost / 100).toFixed(2)}/mês
+            R$ {item.cost.toFixed(2)}/mês
           </Text>
           <Text style={[styles.subscriptionMembers, { color: colors.tint }]}>
             {item.members}/{item.maxMembers} membros
@@ -153,7 +125,7 @@ export default function GroupDetailScreen() {
         </Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: colors.primary }]}
-          onPress={refetch}
+          onPress={() => refetch()}
         >
           <Text style={styles.retryButtonText}>Tentar novamente</Text>
         </TouchableOpacity>
@@ -213,7 +185,7 @@ export default function GroupDetailScreen() {
               onPress={() =>
                 router.push({
                   pathname: '/group-expenses/[id]',
-                  params: { id: groupId.toString() }
+                  params: { id: groupId.toString() },
                 })
               }
             >
@@ -221,11 +193,14 @@ export default function GroupDetailScreen() {
               <Text style={styles.smallButtonText}>Despesas</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.smallButton, { backgroundColor: colors.secondary }]}
+              style={[
+                styles.smallButton,
+                { backgroundColor: colors.secondary },
+              ]}
               onPress={() =>
                 router.push({
                   pathname: '/add-expense',
-                  params: { groupId: groupId.toString() }
+                  params: { groupId: groupId.toString() },
                 })
               }
             >
@@ -248,7 +223,7 @@ export default function GroupDetailScreen() {
         </View>
 
         <FlatList
-          data={group.subscriptions || []}
+          data={(group.subscriptions as GroupSubscription[]) || []}
           renderItem={renderSubscription}
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={false}

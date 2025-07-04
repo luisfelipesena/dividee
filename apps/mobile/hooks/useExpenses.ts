@@ -1,41 +1,23 @@
+import { Expense } from '@monorepo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
 import { api } from '@/lib/api';
 
-interface Expense {
-  id: number;
-  subscriptionId: number;
-  userId: number;
-  description: string;
-  amount: number;
-  category?: string;
-  date: string;
-  createdAt: string;
-  user?: {
-    id: number;
-    fullName: string;
-  };
-  subscription?: {
-    id: number;
-    name: string;
-  };
-}
-
 interface ExpenseSummary {
   totalAmount: number;
   totalCount: number;
-  bySubscription: Array<{
+  bySubscription: {
     subscriptionId: number;
     subscriptionName: string;
     totalAmount: number;
     count: number;
-  }>;
-  byCategory: Array<{
+  }[];
+  byCategory: {
     category: string;
     totalAmount: number;
     count: number;
-  }>;
+  }[];
 }
 
 interface CreateExpenseData {
@@ -44,6 +26,7 @@ interface CreateExpenseData {
   amount: number;
   category?: string;
   date?: string;
+  participants?: number[];
 }
 
 // API functions
@@ -52,8 +35,15 @@ const fetchUserExpenses = async (): Promise<Expense[]> => {
   return data;
 };
 
-const fetchSubscriptionExpenses = async (subscriptionId: number): Promise<Expense[]> => {
+const fetchSubscriptionExpenses = async (
+  subscriptionId: number
+): Promise<Expense[]> => {
   const { data } = await api.get(`/expenses/subscription/${subscriptionId}`);
+  return data;
+};
+
+const fetchGroupExpenses = async (groupId: number): Promise<Expense[]> => {
+  const { data } = await api.get(`/expenses/group/${groupId}`);
   return data;
 };
 
@@ -62,7 +52,9 @@ const fetchExpenseSummary = async (): Promise<ExpenseSummary> => {
   return data;
 };
 
-const createExpense = async (expenseData: CreateExpenseData): Promise<Expense> => {
+const createExpense = async (
+  expenseData: CreateExpenseData
+): Promise<Expense> => {
   const { data } = await api.post('/expenses', expenseData);
   return data;
 };
@@ -87,6 +79,14 @@ export const useSubscriptionExpenses = (subscriptionId: number) => {
   });
 };
 
+export const useGroupExpenses = (groupId: number) => {
+  return useQuery({
+    queryKey: ['expenses', 'group', groupId],
+    queryFn: () => fetchGroupExpenses(groupId),
+    enabled: !!groupId,
+  });
+};
+
 export const useExpenseSummary = () => {
   return useQuery({
     queryKey: ['expenses', 'summary'],
@@ -96,12 +96,14 @@ export const useExpenseSummary = () => {
 
 export const useCreateExpense = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: createExpense,
     onSuccess: () => {
       Alert.alert('Sucesso', 'Despesa adicionada com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['expenses', 'summary'] });
+      queryClient.invalidateQueries({ queryKey: ['group-details'] });
     },
     onError: () => {
       Alert.alert('Erro', 'Não foi possível adicionar a despesa.');
@@ -111,7 +113,7 @@ export const useCreateExpense = () => {
 
 export const useDeleteExpense = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: deleteExpense,
     onSuccess: () => {
