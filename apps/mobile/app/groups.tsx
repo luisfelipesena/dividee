@@ -20,7 +20,7 @@ export default function GroupsScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const { data: groups, isLoading, isError, refetch } = useGroups();
+  const { data: groups, isLoading, refetch } = useGroups();
 
   const renderGroupCard = ({ item }: { item: Group }) => (
     <Card

@@ -25,6 +25,7 @@ const createSubscription = async (subscriptionData: {
   totalCost: number;
   maxMembers: number;
   isPublic: boolean;
+  groupId?: number;
 }) => {
   const { data } = await api.post('/subscriptions', subscriptionData);
   return data;

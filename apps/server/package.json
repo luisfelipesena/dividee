@@ -7,7 +7,8 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx -r dotenv/config src/db/migrate.ts"
+    "db:migrate": "tsx -r dotenv/config src/db/migrate.ts",
+    "db:seed": "tsx -r dotenv/config src/db/seed.ts"
   },
   "keywords": [],
   "author": "",

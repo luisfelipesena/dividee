@@ -23,6 +23,11 @@ const createGroup = async (groupData: {
   return data;
 };
 
+const inviteMember = async (groupId: number, email: string) => {
+  const { data } = await api.post(`/groups/${groupId}/invite`, { email });
+  return data;
+};
+
 // Hooks
 export const useGroups = () => {
   return useQuery({
@@ -49,6 +54,21 @@ export const useCreateGroup = () => {
     },
     onError: () => {
       Alert.alert('Erro', 'Não foi possível criar o grupo.');
+    },
+  });
+};
+
+export const useInviteMember = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ groupId, email }: { groupId: number; email: string }) =>
+      inviteMember(groupId, email),
+    onSuccess: () => {
+      Alert.alert('Sucesso', 'Convite enviado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['group-details'] });
+    },
+    onError: () => {
+      Alert.alert('Erro', 'Não foi possível enviar o convite.');
     },
   });
 };
