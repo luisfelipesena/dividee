@@ -9,10 +9,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
 import SubscriptionCard from '@/components/SubscriptionCard';
-import { View } from '@/components/Themed';
 import { Button, Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -61,12 +61,9 @@ export default function TabHomeScreen() {
         <Text style={[styles.errorText, { color: colors.text }]}>
           Erro ao carregar assinaturas
         </Text>
-        <Button
-          title="Tentar Novamente"
-          onPress={() => refetch()}
-          variant="outline"
-          style={styles.retryButton}
-        />
+        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+          <Text style={styles.retryButtonText}>Tentar Novamente</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -80,13 +77,12 @@ export default function TabHomeScreen() {
       <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
         Comece criando ou participando de uma assinatura compartilhada
       </Text>
-      <Button
-        title="Explorar Assinaturas"
-        onPress={() => router.push('/(tabs)/explore')}
-        variant="primary"
+      <TouchableOpacity
         style={styles.exploreButton}
-        icon="compass"
-      />
+        onPress={() => router.push('/(tabs)/explore')}
+      >
+        <Text style={styles.exploreButtonText}>Explorar Assinaturas</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -118,7 +114,10 @@ export default function TabHomeScreen() {
             </Text>
             {item.description && (
               <Text
-                style={[styles.groupDescription, { color: colors.textSecondary }]}
+                style={[
+                  styles.groupDescription,
+                  { color: colors.textSecondary },
+                ]}
                 numberOfLines={1}
               >
                 {item.description}
@@ -148,130 +147,143 @@ export default function TabHomeScreen() {
   );
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefetching || groupsLoading}
-          onRefresh={() => {
-            refetch();
-            refetchGroups();
-          }}
-          colors={[colors.primary]}
-          tintColor={colors.primary}
-        />
-      }
-    >
-      {/* Savings Card */}
-      {subscriptions && subscriptions.length > 0 && (
-        <View
-          style={[styles.savingsCard, { backgroundColor: colors.secondary }]}
-        >
-          <View>
-            <Text style={[styles.savingsLabel, { color: colors.textInverse }]}>
-              Economia Total Mensal
-            </Text>
-            <Text style={[styles.savingsAmount, { color: colors.textInverse }]}>
-              R$ {totalSavings.toFixed(2)}
-            </Text>
-          </View>
-          <FontAwesome name="bank" size={32} color={colors.textInverse} />
-        </View>
-      )}
-
-      {/* Quick Actions */}
-      <View style={styles.quickActionsContainer}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Ações Rápidas
-        </Text>
-        <View style={styles.quickActions}>
-          <TouchableOpacity
-            style={[styles.actionCard, { backgroundColor: colors.primary }]}
-            onPress={() => router.push('/create-item')}
-          >
-            <FontAwesome name="plus-circle" size={24} color="white" />
-            <Text style={styles.actionText}>Nova Assinatura</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionCard, { backgroundColor: colors.info }]}
-            onPress={() => router.push('/add-expense')}
-          >
-            <FontAwesome name="credit-card" size={24} color="white" />
-            <Text style={styles.actionText}>Adicionar Despesa</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionCard, { backgroundColor: colors.success }]}
-            onPress={() => router.push('/(tabs)/explore')}
-          >
-            <FontAwesome name="search" size={24} color="white" />
-            <Text style={styles.actionText}>Explorar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Groups Section */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Meus Grupos ({groups?.length || 0})
-          </Text>
-          <TouchableOpacity
-            style={[styles.seeAllButton, { borderColor: colors.border }]}
-            onPress={() => router.push('/groups')}
-          >
-            <Text style={[styles.seeAllText, { color: colors.primary }]}>
-              Ver Todos
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {groups && groups.length > 0 ? (
-          <FlatList
-            data={groups.slice(0, 3)} // Show only first 3 groups
-            renderItem={renderGroupCard}
-            keyExtractor={(item) => item.id.toString()}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching || groupsLoading}
+            onRefresh={() => {
+              refetch();
+              refetchGroups();
+            }}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
-        ) : (
-          <Card style={styles.emptyGroupsCard}>
-            <View style={styles.emptyGroupsContent}>
-              <FontAwesome name="users" size={32} color={colors.textTertiary} />
-              <Text style={[styles.emptyGroupsText, { color: colors.text }]}>
-                Você ainda não participa de nenhum grupo
+        }
+      >
+        {/* Savings Card */}
+        {subscriptions && subscriptions.length > 0 && (
+          <View style={[styles.savingsCard]}>
+            <View>
+              <Text style={[styles.savingsLabel, { color: colors.text }]}>
+                Economia Total Mensal
               </Text>
-              <Button
-                title="Criar Grupo"
-                onPress={() => router.push('/create-group')}
-                variant="outline"
-                style={styles.createGroupButton}
-                icon="plus"
-              />
+              <Text style={[styles.savingsAmount, { color: colors.text }]}>
+                R$ {totalSavings.toFixed(2)}
+              </Text>
             </View>
-          </Card>
+            <FontAwesome name="bank" size={32} color={colors.text} />
+          </View>
         )}
-      </View>
 
-      {/* Subscriptions Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Minhas Assinaturas ({subscriptions?.length || 0})
-        </Text>
-        {subscriptions && subscriptions.length > 0 ? (
-          subscriptions.slice(0, 3).map((subscription) => (
-            <SubscriptionCard
-              key={subscription.id}
-              subscription={subscription}
-              onPress={() => handleSubscriptionPress(subscription)}
+        {/* Quick Actions */}
+        <View style={styles.quickActionsContainer}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Ações Rápidas
+          </Text>
+          <View style={styles.quickActions}>
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: colors.primary }]}
+              onPress={() => router.push('/create-item')}
+            >
+              <FontAwesome name="plus-circle" size={24} color="white" />
+              <Text style={styles.actionText}>Nova Assinatura</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: colors.info }]}
+              onPress={() => router.push('/add-expense')}
+            >
+              <FontAwesome name="credit-card" size={24} color="white" />
+              <Text style={styles.actionText}>Adicionar Despesa</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: colors.success }]}
+              onPress={() => router.push('/(tabs)/explore')}
+            >
+              <FontAwesome name="search" size={24} color="white" />
+              <Text style={styles.actionText}>Explorar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Groups Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Meus Grupos ({groups?.length || 0})
+            </Text>
+            <TouchableOpacity
+              style={[styles.seeAllButton, { borderColor: colors.border }]}
+              onPress={() => router.push('/groups')}
+            >
+              <Text style={[styles.seeAllText, { color: colors.primary }]}>
+                Ver Todos
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {groups && groups.length > 0 ? (
+            <FlatList
+              data={groups.slice(0, 3)} // Show only first 3 groups
+              renderItem={renderGroupCard}
+              keyExtractor={(item) => item.id.toString()}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
             />
-          ))
-        ) : (
-          <EmptyComponent />
-        )}
-      </View>
+          ) : (
+            <Card style={styles.emptyGroupsCard}>
+              <View style={styles.emptyGroupsContent}>
+                <FontAwesome
+                  name="users"
+                  size={32}
+                  color={colors.textTertiary}
+                />
+                <Text style={[styles.emptyGroupsText, { color: colors.text }]}>
+                  Você ainda não participa de nenhum grupo
+                </Text>
+                <Button
+                  title="Criar Grupo"
+                  onPress={() => router.push('/create-group')}
+                  variant="outline"
+                  style={styles.createGroupButton}
+                  icon="plus"
+                />
+              </View>
+            </Card>
+          )}
+        </View>
 
-      <View style={styles.bottomPadding} />
-    </ScrollView>
+        {/* Subscriptions Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Minhas Assinaturas ({subscriptions?.length || 0})
+          </Text>
+          {subscriptions && subscriptions.length > 0 ? (
+            subscriptions
+              .slice(0, 3)
+              .map((subscription) => (
+                <SubscriptionCard
+                  key={subscription.id}
+                  subscription={subscription}
+                  onPress={() => handleSubscriptionPress(subscription)}
+                />
+              ))
+          ) : (
+            <EmptyComponent />
+          )}
+        </View>
+
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: colors.secondary }]}
+        onPress={() => router.push('/add-expense')}
+        activeOpacity={0.8}
+      >
+        <FontAwesome name="plus" size={24} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -297,6 +309,15 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 16,
+    padding: 10,
+    backgroundColor: '#ddd',
+    borderRadius: 5,
+  },
+  retryButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   emptyContainer: {
     flex: 1,
@@ -318,6 +339,15 @@ const styles = StyleSheet.create({
   },
   exploreButton: {
     marginTop: 16,
+    padding: 10,
+    backgroundColor: '#007BFF',
+    borderRadius: 5,
+  },
+  exploreButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   savingsCard: {
     flexDirection: 'row',
@@ -440,5 +470,23 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 24,
+  },
+  fab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 90,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

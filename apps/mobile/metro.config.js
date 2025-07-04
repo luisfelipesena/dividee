@@ -21,39 +21,4 @@ config.resolver.nodeModulesPaths = [
 // Force Metro to resolve dependencies from the root
 config.resolver.disableHierarchicalLookup = true;
 
-// 4. Add platforms for better resolution
-config.resolver.platforms = ['native', 'web', 'ios', 'android'];
-
-// 5. Configure transformer to handle source maps properly
-config.transformer.getTransformOptions = async () => ({
-  transform: {
-    experimentalImportSupport: false,
-    inlineRequires: false,
-  },
-});
-
-// 6. Configure symbolication to avoid accessing missing source files
-config.server = {
-  ...config.server,
-  enhanceMiddleware: (middleware, server) => {
-    return (req, res, next) => {
-      // Skip symbolication for missing source files
-      if (req.url && req.url.includes('symbolicate')) {
-        try {
-          return middleware(req, res, next);
-        } catch (error) {
-          if (error.code === 'ENOENT') {
-            // Return empty response for missing source files
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end('{}');
-            return;
-          }
-          throw error;
-        }
-      }
-      return middleware(req, res, next);
-    };
-  },
-};
-
 module.exports = config;
