@@ -1,37 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
+import { LoginRequest, RegisterRequest } from '@monorepo/types';
 
-import { api } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/store/auth';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-interface RegisterData {
-  fullName: string;
-  email: string;
-  password: string;
-}
-
-const loginUser = async (credentials: LoginCredentials) => {
-  const { data } = await api.post('/auth/login', credentials);
-  return data;
-};
-
-const registerUser = async (data: RegisterData) => {
-  const { data: response } = await api.post('/auth/register', data);
-  return response;
-};
 
 export const useLogin = () => {
   const { login } = useAuthStore();
   const router = useRouter();
 
   return useMutation({
-    mutationFn: loginUser,
+    mutationFn: (credentials: LoginRequest) => apiClient.login(credentials),
     onSuccess: (data) => {
       login(data.token);
       router.replace('/(tabs)');
@@ -48,7 +28,7 @@ export const useRegister = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: registerUser,
+    mutationFn: (userData: RegisterRequest) => apiClient.register(userData),
     onSuccess: (data) => {
       login(data.token);
       router.replace('/(tabs)');

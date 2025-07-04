@@ -1,8 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -10,6 +9,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { RegisterFormData, registerSchema } from '@monorepo/types';
 
 import { Button, Card, Input } from '@/components/ui';
 import Colors from '@/constants/Colors';
@@ -17,33 +19,23 @@ import { useRegister } from '@/hooks/useAuth';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function RegisterScreen() {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-
   const registerMutation = useRegister();
 
-  const handleRegister = () => {
-    if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-      return;
-    }
+  const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-    if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As senhas não coincidem.');
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres.');
-      return;
-    }
-
-    registerMutation.mutate({ fullName, email, password });
+  const onSubmit = (data: RegisterFormData) => {
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData);
   };
 
   return (
@@ -78,44 +70,70 @@ export default function RegisterScreen() {
           </View>
 
           <Card variant="filled" style={styles.form}>
-            <Input
-              label="Nome Completo"
-              placeholder="Seu nome"
-              value={fullName}
-              onChangeText={setFullName}
-              autoCapitalize="words"
-              leftIcon="user"
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Nome Completo"
+                  placeholder="Seu nome"
+                  value={value}
+                  onChangeText={onChange}
+                  autoCapitalize="words"
+                  leftIcon="user"
+                  error={errors.fullName?.message}
+                />
+              )}
             />
-            <Input
-              label="E-mail"
-              placeholder="seu@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              leftIcon="envelope"
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="E-mail"
+                  placeholder="seu@email.com"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  leftIcon="envelope"
+                  error={errors.email?.message}
+                />
+              )}
             />
-            <Input
-              label="Senha"
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              leftIcon="lock"
-              rightIcon={showPassword ? 'eye-slash' : 'eye'}
-              onRightIconPress={() => setShowPassword(!showPassword)}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Senha"
+                  placeholder="Mínimo 6 caracteres"
+                  value={value}
+                  onChangeText={onChange}
+                  secureTextEntry
+                  leftIcon="lock"
+                  error={errors.password?.message}
+                />
+              )}
             />
-            <Input
-              label="Confirmar Senha"
-              placeholder="Digite a senha novamente"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showPassword}
-              leftIcon="lock"
+            <Controller
+              control={control}
+              name="confirmPassword"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Confirmar Senha"
+                  placeholder="Digite a senha novamente"
+                  value={value}
+                  onChangeText={onChange}
+                  secureTextEntry
+                  leftIcon="lock"
+                  error={errors.confirmPassword?.message}
+                />
+              )}
             />
             <Button
               title="Criar Conta"
-              onPress={handleRegister}
+              onPress={handleSubmit(onSubmit)}
               loading={registerMutation.isPending}
               fullWidth
               size="large"

@@ -1,9 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { CreateExpenseFormData, createExpenseSchema } from '@monorepo/types';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -41,16 +43,28 @@ export default function AddExpenseScreen() {
   const createExpenseMutation = useCreateExpense();
   const { data: subscriptions } = useSubscriptions();
 
-  const [formData, setFormData] = useState({
-    subscriptionId: subscriptionId ? parseInt(subscriptionId, 10) : 0,
-    description: '',
-    amount: '',
-    category: 'Outros',
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<CreateExpenseFormData>({
+    resolver: zodResolver(createExpenseSchema),
+    defaultValues: {
+      subscriptionId: subscriptionId ? parseInt(subscriptionId, 10) : undefined,
+      description: '',
+      amount: undefined,
+      category: 'Outros',
+      participants: [],
+    },
   });
-  const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
+
+  const watchedSubscriptionId = watch('subscriptionId');
+  const watchedParticipants = watch('participants') || [];
 
   const selectedSubscription = subscriptions?.find(
-    (sub) => sub.id === formData.subscriptionId
+    (sub) => sub.id === watchedSubscriptionId
   );
   const currentGroupId =
     selectedSubscription?.groupId ?? (groupId ? parseInt(groupId) : undefined);
@@ -59,9 +73,12 @@ export default function AddExpenseScreen() {
 
   useEffect(() => {
     if (groupDetails?.members) {
-      setSelectedMembers(groupDetails.members.map((m) => m.id));
+      setValue(
+        'participants',
+        groupDetails.members.map((m) => m.id)
+      );
     }
-  }, [groupDetails]);
+  }, [groupDetails, setValue]);
 
   // Filter subscriptions by group if groupId is provided
   const filteredSubscriptions = groupId
@@ -69,44 +86,18 @@ export default function AddExpenseScreen() {
     : subscriptions;
 
   const handleToggleMember = (memberId: number) => {
-    setSelectedMembers((prev) =>
-      prev.includes(memberId)
-        ? prev.filter((id) => id !== memberId)
-        : [...prev, memberId]
-    );
+    const currentParticipants = watchedParticipants;
+    const newParticipants = currentParticipants.includes(memberId)
+      ? currentParticipants.filter((id) => id !== memberId)
+      : [...currentParticipants, memberId];
+    setValue('participants', newParticipants, { shouldValidate: true });
   };
 
-  const handleSubmit = async () => {
-    if (!formData.subscriptionId) {
-      Alert.alert('Erro', 'Selecione uma assinatura');
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      Alert.alert('Erro', 'A descrição é obrigatória');
-      return;
-    }
-
-    if (!formData.amount || isNaN(Number(formData.amount))) {
-      Alert.alert('Erro', 'O valor deve ser um número válido');
-      return;
-    }
-
-    if (selectedMembers.length === 0) {
-      Alert.alert(
-        'Erro',
-        'Selecione pelo menos um membro para dividir a despesa.'
-      );
-      return;
-    }
-
+  const onSubmit = async (data: CreateExpenseFormData) => {
     try {
       await createExpenseMutation.mutateAsync({
-        subscriptionId: formData.subscriptionId,
-        description: formData.description.trim(),
-        amount: Number(formData.amount),
-        category: formData.category,
-        participants: selectedMembers,
+        ...data,
+        amount: Number(data.amount),
       });
       router.back();
     } catch (error) {
@@ -140,22 +131,42 @@ export default function AddExpenseScreen() {
             <Text style={[styles.label, { color: colors.text }]}>
               Assinatura *
             </Text>
-            <View
-              style={[styles.pickerContainer, { borderColor: colors.border }]}
-            >
-              <Picker
-                selectedValue={formData.subscriptionId}
-                onValueChange={(value: number) =>
-                  setFormData((prev) => ({ ...prev, subscriptionId: value }))
-                }
-                style={[styles.picker, { color: colors.text }]}
-              >
-                <Picker.Item label="Selecione uma assinatura" value={0} />
-                {filteredSubscriptions?.map((sub) => (
-                  <Picker.Item key={sub.id} label={sub.name} value={sub.id} />
-                ))}
-              </Picker>
-            </View>
+            <Controller
+              control={control}
+              name="subscriptionId"
+              render={({ field: { onChange, value } }) => (
+                <View
+                  style={[
+                    styles.pickerContainer,
+                    {
+                      borderColor: errors.subscriptionId
+                        ? colors.error
+                        : colors.border,
+                    },
+                  ]}
+                >
+                  <Picker
+                    selectedValue={value}
+                    onValueChange={onChange}
+                    style={[styles.picker, { color: colors.text }]}
+                  >
+                    <Picker.Item label="Selecione uma assinatura" value={0} />
+                    {filteredSubscriptions?.map((sub) => (
+                      <Picker.Item
+                        key={sub.id}
+                        label={sub.name}
+                        value={sub.id}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )}
+            />
+            {errors.subscriptionId && (
+              <Text style={[styles.errorText, { color: colors.error }]}>
+                {errors.subscriptionId.message}
+              </Text>
+            )}
           </View>
 
           {groupDetails && groupDetails.members && (
@@ -171,7 +182,7 @@ export default function AddExpenseScreen() {
                 >
                   <FontAwesome
                     name={
-                      selectedMembers.includes(member.id)
+                      watchedParticipants.includes(member.id)
                         ? 'check-square-o'
                         : 'square-o'
                     }
@@ -183,6 +194,11 @@ export default function AddExpenseScreen() {
                   </Text>
                 </TouchableOpacity>
               ))}
+              {errors.participants && (
+                <Text style={[styles.errorText, { color: colors.error }]}>
+                  {errors.participants.message}
+                </Text>
+              )}
             </View>
           )}
 
@@ -190,74 +206,112 @@ export default function AddExpenseScreen() {
             <Text style={[styles.label, { color: colors.text }]}>
               Descrição *
             </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                },
-              ]}
-              value={formData.description}
-              onChangeText={(text) =>
-                setFormData((prev) => ({ ...prev, description: text }))
-              }
-              placeholder="Ex: Renovação mensal, Taxa de cancelamento"
-              placeholderTextColor={colors.tint}
-              maxLength={200}
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: errors.description
+                        ? colors.error
+                        : colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.card,
+                    },
+                  ]}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Ex: Renovação mensal, Taxa de cancelamento"
+                  placeholderTextColor={colors.tint}
+                  maxLength={200}
+                />
+              )}
             />
+            {errors.description && (
+              <Text style={[styles.errorText, { color: colors.error }]}>
+                {errors.description.message}
+              </Text>
+            )}
           </View>
 
           <View style={styles.formGroup}>
             <Text style={[styles.label, { color: colors.text }]}>
               Valor (R$) *
             </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.border,
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                },
-              ]}
-              value={formData.amount}
-              onChangeText={(text) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  amount: formatCurrency(text),
-                }))
-              }
-              placeholder="0.00"
-              placeholderTextColor={colors.tint}
-              keyboardType="decimal-pad"
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      borderColor: errors.amount ? colors.error : colors.border,
+                      color: colors.text,
+                      backgroundColor: colors.card,
+                    },
+                  ]}
+                  value={value?.toString()}
+                  onChangeText={(text) => {
+                    const numericValue = text.replace(/[^0-9.]/g, '');
+                    onChange(
+                      numericValue ? parseFloat(numericValue) : undefined
+                    );
+                  }}
+                  placeholder="0.00"
+                  placeholderTextColor={colors.tint}
+                  keyboardType="decimal-pad"
+                />
+              )}
             />
+            {errors.amount && (
+              <Text style={[styles.errorText, { color: colors.error }]}>
+                {errors.amount.message}
+              </Text>
+            )}
           </View>
 
           <View style={styles.formGroup}>
             <Text style={[styles.label, { color: colors.text }]}>
               Categoria
             </Text>
-            <View
-              style={[styles.pickerContainer, { borderColor: colors.border }]}
-            >
-              <Picker
-                selectedValue={formData.category}
-                onValueChange={(value: string) =>
-                  setFormData((prev) => ({ ...prev, category: value }))
-                }
-                style={[styles.picker, { color: colors.text }]}
-              >
-                {EXPENSE_CATEGORIES.map((category) => (
-                  <Picker.Item
-                    key={category}
-                    label={category}
-                    value={category}
-                  />
-                ))}
-              </Picker>
-            </View>
+            <Controller
+              control={control}
+              name="category"
+              render={({ field: { onChange, value } }) => (
+                <View
+                  style={[
+                    styles.pickerContainer,
+                    {
+                      borderColor: errors.category
+                        ? colors.error
+                        : colors.border,
+                    },
+                  ]}
+                >
+                  <Picker
+                    selectedValue={value}
+                    onValueChange={onChange}
+                    style={[styles.picker, { color: colors.text }]}
+                  >
+                    {EXPENSE_CATEGORIES.map((category) => (
+                      <Picker.Item
+                        key={category}
+                        label={category}
+                        value={category}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )}
+            />
+            {errors.category && (
+              <Text style={[styles.errorText, { color: colors.error }]}>
+                {errors.category.message}
+              </Text>
+            )}
           </View>
         </Card>
 
@@ -287,20 +341,10 @@ export default function AddExpenseScreen() {
             style={[
               styles.createButton,
               { backgroundColor: colors.primary },
-              (!formData.subscriptionId ||
-                !formData.description.trim() ||
-                !formData.amount ||
-                createExpenseMutation.isPending) &&
-                styles.disabledButton,
+              createExpenseMutation.isPending && styles.disabledButton,
             ]}
-            onPress={handleSubmit}
-            disabled={
-              !formData.subscriptionId ||
-              !formData.description.trim() ||
-              !formData.amount ||
-              createExpenseMutation.isPending ||
-              selectedMembers.length === 0
-            }
+            onPress={handleSubmit(onSubmit)}
+            disabled={createExpenseMutation.isPending}
           >
             <Text style={styles.createButtonText}>
               {createExpenseMutation.isPending
@@ -413,5 +457,10 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  errorText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 4,
   },
 });

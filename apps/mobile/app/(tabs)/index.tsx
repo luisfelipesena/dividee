@@ -139,7 +139,7 @@ export default function TabHomeScreen() {
       {/* FAB for creating subscriptions */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: colors.primary }]}
-        onPress={() => router.push('/create-subscription')}
+        onPress={() => router.push('/create-item')}
         activeOpacity={0.8}
       >
         <FontAwesome name="plus" size={24} color="white" />

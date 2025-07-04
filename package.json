@@ -10,6 +10,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "expo-linear-gradient": "^14.1.5"
+    "@hookform/resolvers": "^5.1.1",
+    "expo-linear-gradient": "^14.1.5",
+    "react-hook-form": "^7.59.0"
   }
 }

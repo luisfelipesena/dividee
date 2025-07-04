@@ -8,7 +8,15 @@ const router = Router();
 router.use(authMiddleware);
 
 router.post('/', async (req: Request, res: Response) => {
-  const { name, iconUrl, totalCost, maxMembers, isPublic, groupId } = req.body;
+  const {
+    name,
+    iconUrl,
+    totalCost,
+    maxMembers,
+    isPublic,
+    groupId,
+    participants,
+  } = req.body;
   const ownerId = req.user!.id;
 
   try {
@@ -25,10 +33,16 @@ router.post('/', async (req: Request, res: Response) => {
       })
       .returning();
 
-    await db.insert(usersToSubscriptions).values({
-      userId: ownerId,
+    const allMemberIds = [...new Set([ownerId, ...(participants || [])])];
+
+    const usersToSubscriptionsData = allMemberIds.map((userId) => ({
+      userId,
       subscriptionId: newSubscription[0].id,
-    });
+    }));
+
+    if (usersToSubscriptionsData.length > 0) {
+      await db.insert(usersToSubscriptions).values(usersToSubscriptionsData);
+    }
 
     res.status(201).json(newSubscription[0]);
   } catch (error) {

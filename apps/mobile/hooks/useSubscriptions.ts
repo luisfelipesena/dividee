@@ -1,4 +1,4 @@
-import { Subscription } from '@monorepo/types';
+import { CreateSubscriptionFormData, Subscription } from '@monorepo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
@@ -19,14 +19,9 @@ const joinSubscription = async (subscriptionId: number) => {
   await api.post(`/subscriptions/${subscriptionId}/join`);
 };
 
-const createSubscription = async (subscriptionData: {
-  name: string;
-  iconUrl?: string;
-  totalCost: number;
-  maxMembers: number;
-  isPublic: boolean;
-  groupId?: number;
-}) => {
+const createSubscription = async (
+  subscriptionData: CreateSubscriptionFormData
+) => {
   const { data } = await api.post('/subscriptions', subscriptionData);
   return data;
 };

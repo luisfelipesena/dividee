@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "ISC",
-  "private": true
-} 
+  "private": true,
+  "dependencies": {
+    "zod": "^3.25.74"
+  }
+}

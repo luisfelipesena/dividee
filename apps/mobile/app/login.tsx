@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,6 +8,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoginFormData, loginSchema } from '@monorepo/types';
 
 import { Button, Card, Input } from '@/components/ui';
 import Colors from '@/constants/Colors';
@@ -15,18 +18,20 @@ import { useLogin } from '@/hooks/useAuth';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-
   const loginMutation = useLogin();
 
-  const handleLogin = () => {
-    if (email && password) {
-      loginMutation.mutate({ email, password });
-    }
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -52,28 +57,40 @@ export default function LoginScreen() {
         </View>
 
         <Card variant="filled" style={styles.form}>
-          <Input
-            label="E-mail"
-            placeholder="seu@email.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            leftIcon="envelope"
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="E-mail"
+                placeholder="seu@email.com"
+                value={value}
+                onChangeText={onChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                leftIcon="envelope"
+                error={errors.email?.message}
+              />
+            )}
           />
-          <Input
-            label="Senha"
-            placeholder="Digite sua senha"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            leftIcon="lock"
-            rightIcon={showPassword ? 'eye-slash' : 'eye'}
-            onRightIconPress={() => setShowPassword(!showPassword)}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Senha"
+                placeholder="Digite sua senha"
+                value={value}
+                onChangeText={onChange}
+                secureTextEntry
+                leftIcon="lock"
+                error={errors.password?.message}
+              />
+            )}
           />
           <Button
             title="Entrar"
-            onPress={handleLogin}
+            onPress={handleSubmit(onSubmit)}
             loading={loginMutation.isPending}
             fullWidth
             size="large"
