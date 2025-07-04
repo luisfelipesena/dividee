@@ -27,7 +27,7 @@ import { Button, Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCreateSubscription } from '@/hooks/useSubscriptions';
-import { api } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 
 export default function CreateItemScreen() {
   const router = useRouter();
@@ -69,7 +69,7 @@ export default function CreateItemScreen() {
       if (searchQuery.length > 2) {
         setIsSearching(true);
         try {
-          const { data } = await api.get(`/users/search?query=${searchQuery}`);
+          const data = await apiClient.searchUsers(searchQuery);
           setSearchResults(data);
         } catch (error) {
           console.error('Error searching users:', error);

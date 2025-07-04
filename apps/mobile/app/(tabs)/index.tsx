@@ -1,10 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Subscription } from '@monorepo/types';
+import { Group, Subscription } from '@monorepo/types';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,9 +13,10 @@ import {
 
 import SubscriptionCard from '@/components/SubscriptionCard';
 import { View } from '@/components/Themed';
-import { Button } from '@/components/ui';
+import { Button, Card } from '@/components/ui';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useGroups } from '@/hooks/useGroups';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 
 export default function TabHomeScreen() {
@@ -29,6 +31,12 @@ export default function TabHomeScreen() {
     refetch,
     isRefetching,
   } = useSubscriptions();
+
+  const {
+    data: groups,
+    isLoading: groupsLoading,
+    refetch: refetchGroups,
+  } = useGroups();
 
   const handleSubscriptionPress = (subscription: Subscription) => {
     // Navigate to subscription details (to be implemented)
@@ -94,8 +102,67 @@ export default function TabHomeScreen() {
 
   const totalSavings = calculateTotalSavings();
 
+  const renderGroupCard = ({ item }: { item: Group }) => (
+    <Card
+      style={styles.groupCard}
+      onPress={() =>
+        router.push({ pathname: '/group/[id]', params: { id: item.id } })
+      }
+    >
+      <View style={styles.groupCardContent}>
+        <View style={styles.groupInfo}>
+          <FontAwesome name="users" size={20} color={colors.primary} />
+          <View style={styles.groupDetails}>
+            <Text style={[styles.groupName, { color: colors.text }]}>
+              {item.name}
+            </Text>
+            {item.description && (
+              <Text
+                style={[styles.groupDescription, { color: colors.textSecondary }]}
+                numberOfLines={1}
+              >
+                {item.description}
+              </Text>
+            )}
+          </View>
+        </View>
+        <View style={styles.groupActions}>
+          <TouchableOpacity
+            style={[
+              styles.quickActionButton,
+              { backgroundColor: colors.secondary },
+            ]}
+            onPress={(e) => {
+              e.stopPropagation();
+              router.push({
+                pathname: '/add-expense',
+                params: { groupId: item.id.toString() },
+              });
+            }}
+          >
+            <FontAwesome name="plus" size={12} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Card>
+  );
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching || groupsLoading}
+          onRefresh={() => {
+            refetch();
+            refetchGroups();
+          }}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
+    >
+      {/* Savings Card */}
       {subscriptions && subscriptions.length > 0 && (
         <View
           style={[styles.savingsCard, { backgroundColor: colors.secondary }]}
@@ -112,51 +179,104 @@ export default function TabHomeScreen() {
         </View>
       )}
 
-      <FlatList
-        data={subscriptions}
-        renderItem={({ item }) => (
-          <SubscriptionCard
-            subscription={item}
-            onPress={() => handleSubscriptionPress(item)}
-          />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={[
-          styles.list,
-          subscriptions?.length === 0 && styles.emptyList,
-        ]}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
-        ListEmptyComponent={EmptyComponent}
-      />
+      {/* Quick Actions */}
+      <View style={styles.quickActionsContainer}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Ações Rápidas
+        </Text>
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            style={[styles.actionCard, { backgroundColor: colors.primary }]}
+            onPress={() => router.push('/create-item')}
+          >
+            <FontAwesome name="plus-circle" size={24} color="white" />
+            <Text style={styles.actionText}>Nova Assinatura</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionCard, { backgroundColor: colors.info }]}
+            onPress={() => router.push('/add-expense')}
+          >
+            <FontAwesome name="credit-card" size={24} color="white" />
+            <Text style={styles.actionText}>Adicionar Despesa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionCard, { backgroundColor: colors.success }]}
+            onPress={() => router.push('/(tabs)/explore')}
+          >
+            <FontAwesome name="search" size={24} color="white" />
+            <Text style={styles.actionText}>Explorar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      {/* FAB for creating subscriptions */}
-      <TouchableOpacity
-        style={[styles.fab, { backgroundColor: colors.primary }]}
-        onPress={() => router.push('/create-item')}
-        activeOpacity={0.8}
-      >
-        <FontAwesome name="plus" size={24} color="white" />
-      </TouchableOpacity>
-    </View>
+      {/* Groups Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Meus Grupos ({groups?.length || 0})
+          </Text>
+          <TouchableOpacity
+            style={[styles.seeAllButton, { borderColor: colors.border }]}
+            onPress={() => router.push('/groups')}
+          >
+            <Text style={[styles.seeAllText, { color: colors.primary }]}>
+              Ver Todos
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {groups && groups.length > 0 ? (
+          <FlatList
+            data={groups.slice(0, 3)} // Show only first 3 groups
+            renderItem={renderGroupCard}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <Card style={styles.emptyGroupsCard}>
+            <View style={styles.emptyGroupsContent}>
+              <FontAwesome name="users" size={32} color={colors.textTertiary} />
+              <Text style={[styles.emptyGroupsText, { color: colors.text }]}>
+                Você ainda não participa de nenhum grupo
+              </Text>
+              <Button
+                title="Criar Grupo"
+                onPress={() => router.push('/create-group')}
+                variant="outline"
+                style={styles.createGroupButton}
+                icon="plus"
+              />
+            </View>
+          </Card>
+        )}
+      </View>
+
+      {/* Subscriptions Section */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Minhas Assinaturas ({subscriptions?.length || 0})
+        </Text>
+        {subscriptions && subscriptions.length > 0 ? (
+          subscriptions.slice(0, 3).map((subscription) => (
+            <SubscriptionCard
+              key={subscription.id}
+              subscription={subscription}
+              onPress={() => handleSubscriptionPress(subscription)}
+            />
+          ))
+        ) : (
+          <EmptyComponent />
+        )}
+      </View>
+
+      <View style={styles.bottomPadding} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  list: {
-    paddingTop: 10,
-    paddingBottom: 80,
-  },
-  emptyList: {
     flex: 1,
   },
   centered: {
@@ -182,8 +302,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 80,
-    paddingHorizontal: 40,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     fontSize: 20,
@@ -205,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 16,
     marginTop: 16,
-    marginBottom: 8,
+    marginBottom: 16,
     padding: 20,
     borderRadius: 16,
   },
@@ -218,22 +338,107 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
   },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    bottom: 90,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  quickActionsContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 12,
+  },
+  actionCard: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  section: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  seeAllButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 6,
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  groupCard: {
+    padding: 16,
+    marginBottom: 8,
+  },
+  groupCardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  groupInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  groupDetails: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  groupName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  groupDescription: {
+    fontSize: 14,
+  },
+  groupActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  quickActionButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+  },
+  emptyGroupsCard: {
+    padding: 24,
+  },
+  emptyGroupsContent: {
+    alignItems: 'center',
+  },
+  emptyGroupsText: {
+    fontSize: 16,
+    marginTop: 12,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  createGroupButton: {
+    marginTop: 8,
+  },
+  bottomPadding: {
+    height: 24,
   },
 });

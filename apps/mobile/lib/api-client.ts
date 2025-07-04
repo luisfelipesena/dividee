@@ -7,6 +7,7 @@ import {
   Expense,
   Group,
   LoginRequest,
+  PartialUser,
   RegisterRequest,
   Subscription,
   User
@@ -56,6 +57,11 @@ class ApiClient {
       subscriptionCount,
       totalSavings,
     };
+  }
+
+  async searchUsers(query: string): Promise<PartialUser[]> {
+    const { data } = await api.get<PartialUser[]>(`/users/search?query=${query}`);
+    return data;
   }
 
   // Group endpoints

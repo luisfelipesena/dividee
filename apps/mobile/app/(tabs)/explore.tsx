@@ -72,10 +72,28 @@ export default function TabExploreScreen() {
         params: { id: subscription.groupId },
       });
     } else {
-      Alert.alert(
-        'Detalhes',
-        'A visualização de detalhes para assinaturas individuais estará disponível em breve.'
-      );
+      // For individual subscriptions, show detailed info and allow joining
+      const costPerPerson = subscription.cost / (subscription.members + 1);
+      const isMember = mySubscriptions?.some((s) => s.id === subscription.id) ?? false;
+      
+      if (isMember) {
+        Alert.alert(
+          subscription.name,
+          `Você já é membro desta assinatura!\n\nSeu custo: R$ ${(subscription.cost / subscription.members).toFixed(2)}/mês\nMembros: ${subscription.members}/${subscription.maxMembers}`
+        );
+      } else {
+        Alert.alert(
+          subscription.name,
+          `${subscription.notes ? subscription.notes + '\n\n' : ''}Custo por pessoa: R$ ${costPerPerson.toFixed(2)}/mês\nVagas: ${subscription.members}/${subscription.maxMembers}\n\nDeseja entrar nesta assinatura?`,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Entrar',
+              onPress: () => handleJoinSubscription(subscription.id),
+            },
+          ]
+        );
+      }
     }
   };
 
