@@ -2,57 +2,40 @@ import { CreateSubscriptionFormData, Subscription } from '@monorepo/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
-import { api } from '@/lib/api';
-
-// API functions
-const fetchSubscriptions = async (): Promise<Subscription[]> => {
-  const { data } = await api.get('/subscriptions');
-  return data;
-};
-
-const fetchPublicSubscriptions = async (): Promise<Subscription[]> => {
-  const { data } = await api.get('/subscriptions/public');
-  return data;
-};
-
-const joinSubscription = async (subscriptionId: number) => {
-  await api.post(`/subscriptions/${subscriptionId}/join`);
-};
-
-const createSubscription = async (
-  subscriptionData: CreateSubscriptionFormData
-) => {
-  const { data } = await api.post('/subscriptions', subscriptionData);
-  return data;
-};
+import { apiClient } from '@/lib/api-client';
 
 // Hooks
 export const useSubscriptions = () => {
   return useQuery({
     queryKey: ['subscriptions'],
-    queryFn: fetchSubscriptions,
+    queryFn: () => apiClient.getSubscriptions(),
   });
 };
 
 export const usePublicSubscriptions = () => {
   return useQuery({
     queryKey: ['public-subscriptions'],
-    queryFn: fetchPublicSubscriptions,
+    queryFn: () => apiClient.getPublicSubscriptions(),
   });
 };
 
-export const useJoinSubscription = () => {
+export const useJoinSubscription = (options?: {
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: joinSubscription,
+    mutationFn: (subscriptionId: number) => apiClient.joinSubscription(subscriptionId),
     onSuccess: () => {
       Alert.alert('Sucesso', 'Você entrou na assinatura!');
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       queryClient.invalidateQueries({ queryKey: ['public-subscriptions'] });
+      options?.onSuccess?.();
     },
-    onError: () => {
+    onError: (error) => {
       Alert.alert('Erro', 'Não foi possível entrar na assinatura.');
+      options?.onError?.(error);
     },
   });
 };
@@ -61,7 +44,7 @@ export const useCreateSubscription = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createSubscription,
+    mutationFn: (subscriptionData: CreateSubscriptionFormData) => apiClient.createSubscriptionFromForm(subscriptionData),
     onSuccess: () => {
       Alert.alert('Sucesso', 'Assinatura criada com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });

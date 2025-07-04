@@ -36,9 +36,15 @@ export default function TabExploreScreen() {
     isRefetching,
   } = usePublicSubscriptions();
 
-  const { data: mySubscriptions } = useSubscriptions();
+  const { data: mySubscriptions, refetch: refetchMySubscriptions } =
+    useSubscriptions();
 
-  const joinMutation = useJoinSubscription();
+  const joinMutation = useJoinSubscription({
+    onSuccess: () => {
+      refetch();
+      refetchMySubscriptions();
+    },
+  });
 
   const handleJoinSubscription = (subscriptionId: number) => {
     const subscription = subscriptions?.find((s) => s.id === subscriptionId);
@@ -57,6 +63,20 @@ export default function TabExploreScreen() {
         },
       ]
     );
+  };
+
+  const handleViewDetails = (subscription: Subscription) => {
+    if (subscription.groupId) {
+      router.push({
+        pathname: '/group/[id]',
+        params: { id: subscription.groupId },
+      });
+    } else {
+      Alert.alert(
+        'Detalhes',
+        'A visualização de detalhes para assinaturas individuais estará disponível em breve.'
+      );
+    }
   };
 
   if (isLoading) {
@@ -93,10 +113,11 @@ export default function TabExploreScreen() {
     return (
       <SubscriptionCard
         subscription={item}
+        onPress={() => handleViewDetails(item)}
         onJoin={handleJoinSubscription}
         isJoining={joinMutation.isPending && joinMutation.variables === item.id}
         isMember={isMember}
-        showActions={true}
+        showActions
       />
     );
   };
@@ -134,7 +155,7 @@ export default function TabExploreScreen() {
           <Text style={styles.groupsButtonText}>Meus Grupos</Text>
         </TouchableOpacity>
       </View>
-      
+
       <FlatList
         data={subscriptions}
         renderItem={renderItem}
@@ -146,7 +167,10 @@ export default function TabExploreScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={refetch}
+            onRefresh={() => {
+              refetch();
+              refetchMySubscriptions();
+            }}
             colors={[colors.primary]}
             tintColor={colors.primary}
           />

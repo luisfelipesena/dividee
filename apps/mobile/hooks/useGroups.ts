@@ -3,12 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 
 import { apiClient } from '@/lib/api-client';
-import { api } from '@/lib/api';
-
-const inviteMember = async (groupId: number, email: string) => {
-  const { data } = await api.post(`/groups/${groupId}/invite`, { email });
-  return data;
-};
 
 // Hooks
 export const useGroups = () => {
@@ -44,7 +38,7 @@ export const useInviteMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ groupId, email }: { groupId: number; email: string }) =>
-      inviteMember(groupId, email),
+      apiClient.inviteMember(groupId, email),
     onSuccess: () => {
       Alert.alert('Sucesso', 'Convite enviado com sucesso!');
       queryClient.invalidateQueries({ queryKey: ['group-details'] });

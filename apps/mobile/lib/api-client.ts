@@ -3,6 +3,7 @@ import {
   CreateExpenseRequest,
   CreateGroupRequest,
   CreateSubscriptionRequest,
+  CreateSubscriptionFormData,
   Expense,
   Group,
   LoginRequest,
@@ -31,6 +32,32 @@ class ApiClient {
     return data;
   }
 
+  async getUserProfile(): Promise<User> {
+    const { data } = await api.get<User>('/auth/profile');
+    return data;
+  }
+
+  async getUserStats(): Promise<{
+    subscriptionCount: number;
+    totalSavings: number;
+  }> {
+    const { data: subscriptions } = await api.get<Subscription[]>('/subscriptions');
+    
+    const subscriptionCount = subscriptions.length;
+    let totalSavings = 0;
+
+    subscriptions.forEach((sub) => {
+      const yourCost = sub.cost / sub.members;
+      const fullCost = sub.cost;
+      totalSavings += fullCost - yourCost;
+    });
+
+    return {
+      subscriptionCount,
+      totalSavings,
+    };
+  }
+
   // Group endpoints
   async getGroups(): Promise<Group[]> {
     const { data } = await api.get<Group[]>('/groups');
@@ -57,6 +84,11 @@ class ApiClient {
 
   async deleteGroup(groupId: number): Promise<void> {
     await api.delete(`/groups/${groupId}`);
+  }
+
+  async inviteMember(groupId: number, email: string): Promise<void> {
+    const { data } = await api.post(`/groups/${groupId}/invite`, { email });
+    return data;
   }
 
   // Subscription endpoints
@@ -89,6 +121,16 @@ class ApiClient {
     return data;
   }
 
+  async createSubscriptionFromForm(
+    subscriptionData: CreateSubscriptionFormData
+  ): Promise<Subscription> {
+    const { data } = await api.post<Subscription>(
+      '/subscriptions',
+      subscriptionData
+    );
+    return data;
+  }
+
   async updateSubscription(
     subscriptionId: number,
     subscriptionData: Partial<CreateSubscriptionRequest>
@@ -102,6 +144,15 @@ class ApiClient {
 
   async deleteSubscription(subscriptionId: number): Promise<void> {
     await api.delete(`/subscriptions/${subscriptionId}`);
+  }
+
+  async getPublicSubscriptions(): Promise<Subscription[]> {
+    const { data } = await api.get<Subscription[]>('/subscriptions/public');
+    return data;
+  }
+
+  async joinSubscription(subscriptionId: number): Promise<void> {
+    await api.post(`/subscriptions/${subscriptionId}/join`);
   }
 
   // Expense endpoints
