@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '../services/api';
 import axios from 'axios';
 import { env } from '../config/env';
+import { authApi } from '../services/api';
 
 // Types
 export type AuthCredentials = {
   email: string;
   password: string;
+};
+
+export type SignupCredentials = {
+  email: string;
+  password: string;
+  name?: string;
 };
 
 export type User = {
@@ -51,8 +57,8 @@ export function useAuth() {
   
   // Signup mutation
   const signupMutation = useMutation({
-    mutationFn: async (credentials: AuthCredentials) => {
-      return await authApi.signup(credentials.email, credentials.password);
+    mutationFn: async (credentials: SignupCredentials) => {
+      return await authApi.signup(credentials.email, credentials.password, credentials.name);
     },
   });
   

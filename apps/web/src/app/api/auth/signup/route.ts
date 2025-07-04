@@ -1,9 +1,9 @@
+import { generateToken } from '@/lib/auth/jwt';
+import { hashPassword } from '@/lib/auth/password';
+import { db, users } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db, users } from '@/lib/db';
-import { hashPassword } from '@/lib/auth/password';
-import { generateToken } from '@/lib/auth/jwt';
-import { eq } from 'drizzle-orm';
 
 const signupSchema = z.object({
   email: z.string().email('Invalid email address'),
