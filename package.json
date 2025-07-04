@@ -1,0 +1,12 @@
+{
+  "name": "dividee-monorepo",
+  "private": true,
+  "scripts": {
+    "mobile": "pnpm --filter mobile",
+    "server": "pnpm --filter server",
+    "web": "pnpm --filter web"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+} 
