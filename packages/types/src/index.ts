@@ -124,15 +124,6 @@ export interface CreateSubscriptionFormData {
   participants?: number[];
 }
 
-export interface CreateExpenseFormData {
-  subscriptionId: number;
-  description: string;
-  amount: number;
-  category?: string;
-  date?: string;
-  participants?: number[];
-}
-
 // API request/response types
 export interface LoginRequest {
   email: string;
@@ -164,7 +155,7 @@ export interface CreateSubscriptionRequest {
 }
 
 export interface CreateExpenseRequest {
-  subscriptionId: number;
+  subscriptionId?: number;
   description: string;
   amount: number;
   category?: string;

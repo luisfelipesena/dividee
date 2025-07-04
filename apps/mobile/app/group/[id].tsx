@@ -141,14 +141,16 @@ export default function GroupDetailScreen() {
       }
     >
       <View style={styles.header}>
-        <Text style={[styles.groupName, { color: colors.text }]}>
-          {group.name}
-        </Text>
-        {group.description && (
-          <Text style={[styles.groupDescription, { color: colors.tint }]}>
-            {group.description}
+        <View style={styles.headerContent}>
+          <Text style={[styles.groupName, { color: colors.text }]}>
+            {group.name}
           </Text>
-        )}
+          {group.description && (
+            <Text style={[styles.groupDescription, { color: colors.tint }]}>
+              {group.description}
+            </Text>
+          )}
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -160,18 +162,19 @@ export default function GroupDetailScreen() {
             style={[styles.inviteButton, { backgroundColor: colors.primary }]}
             onPress={handleInviteMember}
           >
-            <FontAwesome name="plus" size={16} color="white" />
+            <FontAwesome name="plus" size={12} color="white" />
             <Text style={styles.inviteButtonText}>Convidar</Text>
           </TouchableOpacity>
         </View>
-
-        <FlatList
-          data={group.members || []}
-          renderItem={renderMember}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-        />
+        <Card>
+          <FlatList
+            data={group.members || []}
+            renderItem={renderMember}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+          />
+        </Card>
       </View>
 
       <View style={styles.section}>
@@ -179,63 +182,69 @@ export default function GroupDetailScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Assinaturas ({group.subscriptions?.length || 0})
           </Text>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={[styles.smallButton, { backgroundColor: colors.info }]}
-              onPress={() =>
-                router.push({
-                  pathname: '/group-expenses/[id]',
-                  params: { id: groupId.toString() },
-                })
-              }
-            >
-              <FontAwesome name="bar-chart" size={14} color="white" />
-              <Text style={styles.smallButtonText}>Despesas</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.smallButton,
-                { backgroundColor: colors.secondary },
-              ]}
-              onPress={() =>
-                router.push({
-                  pathname: '/add-expense',
-                  params: { groupId: groupId.toString() },
-                })
-              }
-            >
-              <FontAwesome name="plus" size={14} color="white" />
-              <Text style={styles.smallButtonText}>Gasto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.smallButton, { backgroundColor: colors.primary }]}
-              onPress={() =>
-                router.push({
-                  pathname: '/create-subscription',
-                  params: { groupId: groupId.toString() },
-                })
-              }
-            >
-              <FontAwesome name="plus" size={14} color="white" />
-              <Text style={styles.smallButtonText}>Assinatura</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[styles.smallButton, { backgroundColor: colors.primary }]}
+            onPress={() =>
+              router.push({
+                pathname: '/create-item',
+                params: { groupId: groupId.toString() },
+              })
+            }
+          >
+            <FontAwesome name="plus" size={12} color="white" />
+            <Text style={styles.smallButtonText}>Nova Assinatura</Text>
+          </TouchableOpacity>
         </View>
+        <Card>
+          <FlatList
+            data={(group.subscriptions as GroupSubscription[]) || []}
+            renderItem={renderSubscription}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyState}>
+                <FontAwesome
+                  name="folder-open-o"
+                  size={32}
+                  color={colors.textTertiary}
+                />
+                <Text style={[styles.emptyText, { color: colors.tint }]}>
+                  Nenhuma assinatura neste grupo
+                </Text>
+              </View>
+            )}
+          />
+        </Card>
+      </View>
 
-        <FlatList
-          data={(group.subscriptions as GroupSubscription[]) || []}
-          renderItem={renderSubscription}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyState}>
-              <Text style={[styles.emptyText, { color: colors.tint }]}>
-                Nenhuma assinatura encontrada
-              </Text>
-            </View>
-          )}
-        />
+      <View style={styles.actionsSection}>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: colors.info }]}
+            onPress={() =>
+              router.push({
+                pathname: '/group-expenses/[id]',
+                params: { id: groupId.toString() },
+              })
+            }
+          >
+            <FontAwesome name="bar-chart" size={16} color="white" />
+            <Text style={styles.actionButtonText}>Ver Despesas</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: colors.secondary }]}
+            onPress={() =>
+              router.push({
+                pathname: '/add-expense',
+                params: { groupId: groupId.toString() },
+              })
+            }
+          >
+            <FontAwesome name="credit-card" size={16} color="white" />
+            <Text style={styles.actionButtonText}>Adicionar Gasto</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -251,12 +260,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+  },
+  headerContent: {
+    alignItems: 'center',
   },
   groupName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 8,
   },
@@ -280,49 +291,38 @@ const styles = StyleSheet.create({
   inviteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   inviteButtonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: 6,
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'center',
+    gap: 12,
   },
   smallButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 20,
   },
   smallButtonText: {
     color: 'white',
     fontSize: 12,
     fontWeight: '600',
-    marginLeft: 4,
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  addButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: 6,
   },
   memberCard: {
     padding: 16,
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
   },
   memberInfo: {
     flexDirection: 'row',
@@ -352,11 +352,12 @@ const styles = StyleSheet.create({
   },
   subscriptionCard: {
     padding: 16,
-    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
   },
   subscriptionInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   subscriptionDetails: {
     flex: 1,
@@ -380,7 +381,7 @@ const styles = StyleSheet.create({
   publicBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: 12,
   },
   publicText: {
     color: 'white',
@@ -388,8 +389,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   emptyState: {
-    padding: 20,
+    paddingVertical: 32,
     alignItems: 'center',
+    gap: 12,
   },
   emptyText: {
     fontSize: 16,
@@ -403,11 +405,29 @@ const styles = StyleSheet.create({
   retryButton: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  actionsSection: {
+    padding: 20,
+    marginTop: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

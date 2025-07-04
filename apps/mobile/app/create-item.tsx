@@ -57,6 +57,7 @@ export default function CreateItemScreen() {
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<PartialUser[]>([]);
+  const [allUsers, setAllUsers] = useState<PartialUser[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<PartialUser[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -65,25 +66,31 @@ export default function CreateItemScreen() {
   }, [itemType, setValue]);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.length > 2) {
-        setIsSearching(true);
-        try {
-          const data = await apiClient.searchUsers(searchQuery);
-          setSearchResults(data);
-        } catch (error) {
-          console.error('Error searching users:', error);
-          setSearchResults([]);
-        } finally {
-          setIsSearching(false);
-        }
-      } else {
-        setSearchResults([]);
+    const fetchUsers = async () => {
+      setIsSearching(true);
+      try {
+        const data = await apiClient.searchUsers('');
+        setAllUsers(data);
+        setSearchResults(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setIsSearching(false);
       }
-    }, 500);
+    };
+    fetchUsers();
+  }, []);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery]);
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const filtered = allUsers.filter((user) =>
+        (user.fullName || '').toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults(allUsers);
+    }
+  }, [searchQuery, allUsers]);
 
   useEffect(() => {
     setValue(
@@ -278,19 +285,17 @@ export default function CreateItemScreen() {
               />
             </View>
             {isSearching && <ActivityIndicator style={{ marginTop: 8 }} />}
-            {searchResults.length > 0 && (
-              <View style={styles.searchResultsContainer}>
-                {searchResults.map((user) => (
-                  <TouchableOpacity
-                    key={user.id}
-                    style={styles.searchResultItem}
-                    onPress={() => handleSelectMember(user)}
-                  >
-                    <Text style={{ color: colors.text }}>{user.fullName}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
+            <View style={styles.searchResultsContainer}>
+              {searchResults.map((user) => (
+                <TouchableOpacity
+                  key={user.id}
+                  style={styles.searchResultItem}
+                  onPress={() => handleSelectMember(user)}
+                >
+                  <Text style={{ color: colors.text }}>{user.fullName}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <View style={styles.selectedMembersContainer}>
               {selectedMembers.map((user) => (
                 <View

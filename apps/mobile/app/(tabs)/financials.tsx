@@ -106,266 +106,299 @@ export default function TabFinancialsScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
-            Dashboard Financeiro
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Acompanhe seus gastos e economias
+            Visão Financeira
           </Text>
         </View>
 
         {/* Summary Cards */}
-        <View style={styles.cardsRow}>
+        <View style={styles.summarySection}>
           <Card variant="elevated" style={styles.summaryCard}>
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: colors.primary + '20' },
-              ]}
-            >
-              <FontAwesome name="money" size={24} color={colors.primary} />
+            <View style={styles.summaryContent}>
+              <FontAwesome name="arrow-down" size={20} color={colors.error} />
+              <View style={styles.summaryText}>
+                <Text
+                  style={[styles.cardLabel, { color: colors.textSecondary }]}
+                >
+                  Gasto Mensal
+                </Text>
+                <Text style={[styles.cardValue, { color: colors.text }]}>
+                  R$ {financials.totalMonthly.toFixed(2)}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>
-              Gasto Mensal
-            </Text>
-            <Text style={[styles.cardValue, { color: colors.text }]}>
-              R$ {financials.totalMonthly.toFixed(2)}
-            </Text>
           </Card>
-
           <Card variant="elevated" style={styles.summaryCard}>
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: colors.secondary + '20' },
-              ]}
-            >
-              <FontAwesome name="bank" size={24} color={colors.secondary} />
+            <View style={styles.summaryContent}>
+              <FontAwesome name="bank" size={20} color={colors.success} />
+              <View style={styles.summaryText}>
+                <Text
+                  style={[styles.cardLabel, { color: colors.textSecondary }]}
+                >
+                  Economia Mensal
+                </Text>
+                <Text style={[styles.cardValue, { color: colors.success }]}>
+                  R$ {financials.totalSavings.toFixed(2)}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.cardLabel, { color: colors.textSecondary }]}>
-              Economia Mensal
-            </Text>
-            <Text style={[styles.cardValue, { color: colors.secondary }]}>
-              R$ {financials.totalSavings.toFixed(2)}
-            </Text>
           </Card>
         </View>
 
         {/* Statistics */}
-        <Card variant="filled" style={styles.statsCard}>
+        <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Estatísticas
           </Text>
-
-          <View style={styles.statRow}>
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Assinaturas Ativas
-              </Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                {financials.subscriptionCount}
-              </Text>
+          <Card variant="filled" style={styles.statsCard}>
+            <View style={styles.statRow}>
+              <View style={styles.statItem}>
+                <Text
+                  style={[styles.statLabel, { color: colors.textSecondary }]}
+                >
+                  Assinaturas Ativas
+                </Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  {financials.subscriptionCount}
+                </Text>
+              </View>
+              <View
+                style={[styles.statDivider, { backgroundColor: colors.border }]}
+              />
+              <View style={styles.statItem}>
+                <Text
+                  style={[styles.statLabel, { color: colors.textSecondary }]}
+                >
+                  Economia Média
+                </Text>
+                <Text style={[styles.statValue, { color: colors.text }]}>
+                  R$ {financials.averageSaving.toFixed(2)}
+                </Text>
+              </View>
             </View>
-            <View
-              style={[styles.statDivider, { backgroundColor: colors.border }]}
-            />
-            <View style={styles.statItem}>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                Economia Média
-              </Text>
-              <Text style={[styles.statValue, { color: colors.text }]}>
-                R$ {financials.averageSaving.toFixed(2)}
-              </Text>
-            </View>
-          </View>
 
-          <View style={[styles.progressContainer, { marginTop: 20 }]}>
-            <Text
-              style={[styles.progressLabel, { color: colors.textSecondary }]}
-            >
-              Porcentagem de Economia
-            </Text>
-            <View
-              style={[styles.progressBar, { backgroundColor: colors.surface }]}
-            >
+            <View style={[styles.progressContainer, { marginTop: 20 }]}>
+              <Text
+                style={[styles.progressLabel, { color: colors.textSecondary }]}
+              >
+                Porcentagem de Economia
+              </Text>
               <View
                 style={[
-                  styles.progressFill,
-                  {
-                    backgroundColor: colors.secondary,
-                    width: `${financials.totalMonthly + financials.totalSavings > 0 ? (financials.totalSavings / (financials.totalMonthly + financials.totalSavings)) * 100 : 0}%`,
-                  },
+                  styles.progressBar,
+                  { backgroundColor: colors.surface },
                 ]}
-              />
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: colors.secondary,
+                      width: `${financials.totalMonthly + financials.totalSavings > 0 ? (financials.totalSavings / (financials.totalMonthly + financials.totalSavings)) * 100 : 0}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.progressText, { color: colors.secondary }]}>
+                {financials.totalMonthly + financials.totalSavings > 0
+                  ? `${Math.round((financials.totalSavings / (financials.totalMonthly + financials.totalSavings)) * 100)}% economizado`
+                  : '0% economizado'}
+              </Text>
             </View>
-            <Text style={[styles.progressText, { color: colors.secondary }]}>
-              {financials.totalMonthly + financials.totalSavings > 0
-                ? `${Math.round((financials.totalSavings / (financials.totalMonthly + financials.totalSavings)) * 100)}% economizado`
-                : '0% economizado'}
-            </Text>
-          </View>
-        </Card>
+          </Card>
+        </View>
 
         {/* Subscriptions Breakdown */}
-        <Card variant="elevated" style={styles.breakdownCard}>
+        <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Detalhamento por Assinatura
           </Text>
+          <Card variant="elevated" style={styles.breakdownCard}>
+            {subscriptions && subscriptions.length > 0 ? (
+              subscriptions.map((sub, index) => {
+                const yourCost = sub.cost / sub.members;
+                const saving = sub.cost - yourCost;
 
-          {subscriptions && subscriptions.length > 0 ? (
-            subscriptions.map((sub) => {
-              const yourCost = sub.cost / sub.members;
-              const saving = sub.cost - yourCost;
+                return (
+                  <View
+                    key={sub.id}
+                    style={[
+                      styles.breakdownItem,
+                      {
+                        borderBottomColor: colors.border,
+                        borderBottomWidth:
+                          index === subscriptions.length - 1 ? 0 : 1,
+                      },
+                    ]}
+                  >
+                    <View style={styles.breakdownInfo}>
+                      <Text
+                        style={[styles.breakdownName, { color: colors.text }]}
+                      >
+                        {sub.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.breakdownMembers,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        {sub.members}/{sub.maxMembers} membros
+                      </Text>
+                    </View>
+                    <View style={styles.breakdownValues}>
+                      <Text
+                        style={[styles.breakdownCost, { color: colors.text }]}
+                      >
+                        R$ {yourCost.toFixed(2)}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.breakdownSaving,
+                          { color: colors.secondary },
+                        ]}
+                      >
+                        Economia: R$ {saving.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            ) : (
+              <Text
+                style={{ color: colors.textSecondary, textAlign: 'center' }}
+              >
+                Você ainda não participa de nenhuma assinatura.
+              </Text>
+            )}
+          </Card>
+        </View>
 
-              return (
-                <View key={sub.id} style={styles.breakdownItem}>
-                  <View style={styles.breakdownInfo}>
-                    <Text
-                      style={[styles.breakdownName, { color: colors.text }]}
-                    >
-                      {sub.name}
-                    </Text>
+        {/* Expenses Summary */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Resumo de Despesas
+          </Text>
+          <Card variant="elevated" style={styles.expensesCard}>
+            <View style={styles.expensesHeader}>
+              <Text style={[styles.subsectionTitle, { color: colors.text }]}>
+                Atividade Recente
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addExpenseButton,
+                  { backgroundColor: colors.primary },
+                ]}
+                onPress={() => router.push('/add-expense')}
+              >
+                <FontAwesome name="plus" size={16} color="white" />
+                <Text style={styles.addExpenseText}>Adicionar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {isLoadingExpenses ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : expenseSummary && expenseSummary.totalCount > 0 ? (
+              <>
+                <View style={styles.expensesStats}>
+                  <View style={styles.expensesStat}>
                     <Text
                       style={[
-                        styles.breakdownMembers,
+                        styles.expensesStatLabel,
                         { color: colors.textSecondary },
                       ]}
                     >
-                      {sub.members}/{sub.maxMembers} membros
-                    </Text>
-                  </View>
-                  <View style={styles.breakdownValues}>
-                    <Text
-                      style={[styles.breakdownCost, { color: colors.text }]}
-                    >
-                      R$ {yourCost.toFixed(2)}
+                      Total em Despesas
                     </Text>
                     <Text
                       style={[
-                        styles.breakdownSaving,
-                        { color: colors.secondary },
+                        styles.expensesStatValue,
+                        { color: colors.error },
                       ]}
                     >
-                      Economia: R$ {saving.toFixed(2)}
+                      R$ {expenseSummary.totalAmount?.toFixed(2) || '0.00'}
                     </Text>
                   </View>
-                </View>
-              );
-            })
-          ) : (
-            <Text style={{ color: colors.textSecondary, textAlign: 'center' }}>
-              Você ainda não participa de nenhuma assinatura.
-            </Text>
-          )}
-        </Card>
-
-        {/* Expenses Summary */}
-        <Card variant="elevated" style={styles.expensesCard}>
-          <View style={styles.expensesHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Resumo de Despesas
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.addExpenseButton,
-                { backgroundColor: colors.primary },
-              ]}
-              onPress={() => router.push('/add-expense')}
-            >
-              <FontAwesome name="plus" size={16} color="white" />
-              <Text style={styles.addExpenseText}>Adicionar</Text>
-            </TouchableOpacity>
-          </View>
-
-          {isLoadingExpenses ? (
-            <ActivityIndicator color={colors.primary} />
-          ) : expenseSummary && expenseSummary.totalCount > 0 ? (
-            <>
-              <View style={styles.expensesStats}>
-                <View style={styles.expensesStat}>
-                  <Text
-                    style={[
-                      styles.expensesStatLabel,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    Total em Despesas
-                  </Text>
-                  <Text
-                    style={[styles.expensesStatValue, { color: colors.error }]}
-                  >
-                    R$ {expenseSummary.totalAmount?.toFixed(2) || '0.00'}
-                  </Text>
-                </View>
-                <View style={styles.expensesStat}>
-                  <Text
-                    style={[
-                      styles.expensesStatLabel,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
-                    Número de Despesas
-                  </Text>
-                  <Text
-                    style={[styles.expensesStatValue, { color: colors.text }]}
-                  >
-                    {expenseSummary.totalCount || 0}
-                  </Text>
-                </View>
-              </View>
-
-              {expenseSummary.byCategory &&
-                expenseSummary.byCategory.length > 0 && (
-                  <View style={styles.expensesByCategory}>
+                  <View style={styles.expensesStat}>
                     <Text
-                      style={[styles.subsectionTitle, { color: colors.text }]}
+                      style={[
+                        styles.expensesStatLabel,
+                        { color: colors.textSecondary },
+                      ]}
                     >
-                      Por Categoria
+                      Número de Despesas
                     </Text>
-                    {expenseSummary.byCategory.map((category) => (
-                      <View key={category.category} style={styles.categoryItem}>
-                        <Text
-                          style={[styles.categoryName, { color: colors.text }]}
-                        >
-                          {category.category}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.categoryAmount,
-                            { color: colors.text },
-                          ]}
-                        >
-                          R$ {category.totalAmount.toFixed(2)}
-                        </Text>
-                      </View>
-                    ))}
+                    <Text
+                      style={[styles.expensesStatValue, { color: colors.text }]}
+                    >
+                      {expenseSummary.totalCount || 0}
+                    </Text>
                   </View>
-                )}
-            </>
-          ) : (
-            <Text style={{ color: colors.textSecondary, textAlign: 'center' }}>
-              Nenhuma despesa registrada ainda.
-            </Text>
-          )}
-        </Card>
+                </View>
+
+                {expenseSummary.byCategory &&
+                  expenseSummary.byCategory.length > 0 && (
+                    <View style={styles.expensesByCategory}>
+                      <Text
+                        style={[styles.subsectionTitle, { color: colors.text }]}
+                      >
+                        Por Categoria
+                      </Text>
+                      {expenseSummary.byCategory.map((category) => (
+                        <View
+                          key={category.category}
+                          style={styles.categoryItem}
+                        >
+                          <Text
+                            style={[
+                              styles.categoryName,
+                              { color: colors.text },
+                            ]}
+                          >
+                            {category.category}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.categoryAmount,
+                              { color: colors.text },
+                            ]}
+                          >
+                            R$ {category.totalAmount.toFixed(2)}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+              </>
+            ) : (
+              <Text
+                style={{ color: colors.textSecondary, textAlign: 'center' }}
+              >
+                Nenhuma despesa registrada ainda.
+              </Text>
+            )}
+          </Card>
+        </View>
 
         {/* Annual Projection */}
-        <Card
-          variant="filled"
-          style={[styles.projectionCard, { marginBottom: 100 }]}
-        >
-          <FontAwesome name="line-chart" size={24} color={colors.info} />
-          <Text style={[styles.projectionTitle, { color: colors.text }]}>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Projeção Anual
           </Text>
-          <Text style={[styles.projectionValue, { color: colors.info }]}>
-            R$ {(financials.totalSavings * 12).toFixed(2)}
-          </Text>
-          <Text
-            style={[styles.projectionLabel, { color: colors.textSecondary }]}
-          >
-            de economia em 12 meses
-          </Text>
-        </Card>
+          <Card variant="filled" style={styles.projectionCard}>
+            <FontAwesome name="line-chart" size={24} color={colors.info} />
+            <Text style={[styles.projectionTitle, { color: colors.text }]}>
+              Economia Anual Estimada
+            </Text>
+            <Text style={[styles.projectionValue, { color: colors.info }]}>
+              R$ {(financials.totalSavings * 12).toFixed(2)}
+            </Text>
+            <Text
+              style={[styles.projectionLabel, { color: colors.textSecondary }]}
+            >
+              de economia em 12 meses
+            </Text>
+          </Card>
+        </View>
       </ScrollView>
 
       {/* FAB for adding expenses */}
@@ -400,51 +433,50 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   header: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     paddingBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 16,
-  },
-  cardsRow: {
+  summarySection: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     gap: 12,
+    marginBottom: 24,
   },
   summaryCard: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 20,
+    padding: 16,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  summaryContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+  },
+  summaryText: {
+    marginLeft: 12,
   },
   cardLabel: {
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: 14,
+    marginBottom: 2,
   },
   cardValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
   },
+  section: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
   statsCard: {
-    margin: 16,
-    marginTop: 20,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   statRow: {
     flexDirection: 'row',
@@ -489,8 +521,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   breakdownCard: {
-    margin: 16,
-    marginTop: 0,
+    padding: 16,
   },
   breakdownItem: {
     flexDirection: 'row',
@@ -498,7 +529,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#00000010',
   },
   breakdownInfo: {
     flex: 1,
@@ -523,9 +553,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   projectionCard: {
-    margin: 16,
+    margin: 0,
     alignItems: 'center',
-    paddingVertical: 24,
+    padding: 24,
   },
   projectionTitle: {
     fontSize: 16,
@@ -541,21 +571,20 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   expensesCard: {
-    margin: 16,
-    marginTop: 0,
+    margin: 0,
+    padding: 16,
   },
   expensesHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
   },
   addExpenseButton: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 6,
+    borderRadius: 20,
   },
   addExpenseText: {
     color: 'white',
@@ -565,7 +594,8 @@ const styles = StyleSheet.create({
   },
   expensesStats: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginVertical: 16,
+    gap: 16,
   },
   expensesStat: {
     flex: 1,
@@ -580,20 +610,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   expensesByCategory: {
-    marginTop: 16,
+    marginTop: 8,
   },
   subsectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#00000010',
   },
   categoryName: {
     fontSize: 14,

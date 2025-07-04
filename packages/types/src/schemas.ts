@@ -39,7 +39,11 @@ export const createSubscriptionSchema = z.object({
 
 // Expense schemas
 export const createExpenseSchema = z.object({
-  subscriptionId: z.number().int().positive('ID da assinatura é obrigatório'),
+  subscriptionId: z
+    .number()
+    .int()
+    .positive('ID da assinatura é obrigatório')
+    .optional(),
   description: z.string().min(2, 'Descrição deve ter pelo menos 2 caracteres'),
   amount: z.number().positive('Valor deve ser positivo'),
   category: z.string().optional(),

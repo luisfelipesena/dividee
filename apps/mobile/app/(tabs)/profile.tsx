@@ -103,16 +103,10 @@ export default function TabProfileScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       showsVerticalScrollIndicator={false}
-      stickyHeaderIndices={[0]}
     >
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Perfil</Text>
-      </View>
       <View style={styles.profileHeader}>
-        <View style={styles.avatarContainer}>
-          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <FontAwesome name="user" size={32} color="white" />
-          </View>
+        <View style={styles.avatar}>
+          <FontAwesome name="user" size={32} color={colors.primary} />
         </View>
         <Text style={[styles.name, { color: colors.text }]}>
           {userProfile?.fullName || 'Carregando...'}
@@ -122,7 +116,7 @@ export default function TabProfileScreen() {
         </Text>
       </View>
 
-      <View style={[styles.statsCard, { backgroundColor: colors.card }]}>
+      <View style={[styles.statsCard, { backgroundColor: colors.surface }]}>
         <View style={styles.statItem}>
           <Text style={[styles.statValue, { color: colors.text }]}>
             {userStats?.subscriptionCount || 0}
@@ -155,22 +149,18 @@ export default function TabProfileScreen() {
         </Text>
       </View>
 
-      <View style={[styles.menuContainer, { backgroundColor: colors.card }]}>
+      <View style={styles.menuContainer}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.menuItem,
-              { borderBottomColor: colors.border },
-              index === menuItems.length - 1 && { borderBottomWidth: 0 },
-            ]}
+            style={[styles.menuItem, { borderBottomColor: colors.border }]}
             onPress={item.onPress}
             activeOpacity={0.7}
           >
             <View
               style={[
                 styles.menuIcon,
-                { backgroundColor: `${iconColors[index]}33` },
+                { backgroundColor: `${iconColors[index]}20` },
               ]}
             >
               <FontAwesome
@@ -234,23 +224,16 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingVertical: 24,
   },
-  avatarContainer: {
+  avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff1a',
+    backgroundColor: '#9ca3af20',
     marginBottom: 16,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   name: {
     fontSize: 22,
@@ -266,23 +249,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     borderRadius: 16,
     paddingVertical: 20,
+    borderWidth: 1,
+    borderColor: '#ffffff1a',
   },
   statItem: {
     alignItems: 'center',
+    gap: 4,
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 4,
   },
   statLabel: {
     fontSize: 14,
   },
   statSeparator: {
     width: 1,
-    height: '60%',
-    backgroundColor: '#30363d',
-    alignSelf: 'center',
+    height: '100%',
+    backgroundColor: '#ffffff1a',
   },
   memberInfo: {
     flexDirection: 'row',
@@ -297,6 +281,8 @@ const styles = StyleSheet.create({
   menuContainer: {
     marginHorizontal: 24,
     borderRadius: 16,
+    backgroundColor: '#ffffff08',
+    overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',

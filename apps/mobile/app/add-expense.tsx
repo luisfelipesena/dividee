@@ -1,33 +1,47 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateExpenseFormData, createExpenseSchema } from '@monorepo/types';
+import {
+  CreateExpenseFormData,
+  PartialUser,
+  createExpenseSchema,
+} from '@monorepo/types';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  ActivityIndicator,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import { Card } from '@/components/ui';
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import {
+  Button,
+  Card,
+  ScrollContainer,
+  Section,
+  Heading,
+  Body,
+  FormGroup,
+  FormLabel,
+  FormError,
+  Row,
+  Tag,
+  Checkbox,
+} from '@/components/ui';
+import { useDesignSystem } from '@/hooks/useDesignSystem';
 import { useCreateExpense } from '@/hooks/useExpenses';
 import { useGroupDetails } from '@/hooks/useGroups';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { apiClient } from '@/lib/api-client';
 
 const EXPENSE_CATEGORIES = [
-  'Renovação',
-  'Taxa Extra',
-  'Upgrade',
-  'Multa',
+  'Alimentação',
+  'Transporte',
+  'Moradia',
+  'Lazer',
   'Outros',
 ];
 
@@ -37,11 +51,16 @@ export default function AddExpenseScreen() {
     groupId?: string;
   }>();
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const { colors } = useDesignSystem();
 
   const createExpenseMutation = useCreateExpense();
   const { data: subscriptions } = useSubscriptions();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<PartialUser[]>([]);
+  const [allUsers, setAllUsers] = useState<PartialUser[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<PartialUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const {
     control,
@@ -67,9 +86,28 @@ export default function AddExpenseScreen() {
     (sub) => sub.id === watchedSubscriptionId
   );
   const currentGroupId =
-    selectedSubscription?.groupId ?? (groupId ? parseInt(groupId) : undefined);
+    selectedSubscription?.groupId ??
+    (groupId ? parseInt(groupId, 10) : undefined);
 
   const { data: groupDetails } = useGroupDetails(currentGroupId as number);
+
+  useEffect(() => {
+    if (!watchedSubscriptionId && allUsers.length === 0) {
+      const fetchUsers = async () => {
+        setIsSearching(true);
+        try {
+          const data = await apiClient.searchUsers('');
+          setAllUsers(data);
+          setSearchResults(data);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [watchedSubscriptionId, allUsers]);
 
   useEffect(() => {
     if (groupDetails?.members) {
@@ -80,10 +118,29 @@ export default function AddExpenseScreen() {
     }
   }, [groupDetails, setValue]);
 
-  // Filter subscriptions by group if groupId is provided
-  const filteredSubscriptions = groupId
-    ? subscriptions?.filter((sub) => sub.groupId === parseInt(groupId, 10))
-    : subscriptions;
+  useEffect(() => {
+    if (!watchedSubscriptionId) {
+      if (searchQuery.length > 0) {
+        const filtered = allUsers.filter((user) =>
+          (user.fullName || '')
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        );
+        setSearchResults(filtered);
+      } else {
+        setSearchResults(allUsers);
+      }
+    }
+  }, [searchQuery, allUsers, watchedSubscriptionId]);
+
+  useEffect(() => {
+    if (!watchedSubscriptionId) {
+      setValue(
+        'participants',
+        selectedMembers.map((m) => m.id)
+      );
+    }
+  }, [selectedMembers, setValue, watchedSubscriptionId]);
 
   const handleToggleMember = (memberId: number) => {
     const currentParticipants = watchedParticipants;
@@ -93,11 +150,23 @@ export default function AddExpenseScreen() {
     setValue('participants', newParticipants, { shouldValidate: true });
   };
 
+  const handleSelectMember = (user: PartialUser) => {
+    if (!selectedMembers.some((m) => m.id === user.id)) {
+      setSelectedMembers([...selectedMembers, user]);
+    }
+    setSearchQuery('');
+  };
+
+  const handleRemoveMember = (userId: number) => {
+    setSelectedMembers(selectedMembers.filter((m) => m.id !== userId));
+  };
+
   const onSubmit = async (data: CreateExpenseFormData) => {
     try {
       await createExpenseMutation.mutateAsync({
         ...data,
         amount: Number(data.amount),
+        subscriptionId: data.subscriptionId,
       });
       router.back();
     } catch (error) {
@@ -105,362 +174,280 @@ export default function AddExpenseScreen() {
     }
   };
 
-  const formatCurrency = (value: string) => {
-    const numericValue = value.replace(/[^\d.,]/g, '');
-    const normalizedValue = numericValue.replace(',', '.');
-    return normalizedValue;
-  };
-
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Adicionar Despesa
-          </Text>
-          <Text style={[styles.subtitle, { color: colors.tint }]}>
-            Registre uma despesa relacionada a suas assinaturas
-          </Text>
-        </View>
+    <ScrollContainer>
+      <Section>
+        <Heading level={1}>Adicionar Despesa</Heading>
+        <Body color="textSecondary">
+          Registre um gasto e divida com seus amigos.
+        </Body>
+      </Section>
 
-        <Card style={styles.formCard}>
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Assinatura *
-            </Text>
-            <Controller
-              control={control}
-              name="subscriptionId"
-              render={({ field: { onChange, value } }) => (
-                <View
+      <Card>
+        <FormGroup>
+          <FormLabel>Associar a uma Assinatura (Opcional)</FormLabel>
+          <Controller
+            control={control}
+            name="subscriptionId"
+            render={({ field: { onChange, value } }) => (
+              <View
+                style={[
+                  localStyles.pickerContainer,
+                  {
+                    borderColor: errors.subscriptionId
+                      ? colors.error
+                      : colors.border,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+              >
+                <Picker
+                  selectedValue={value}
+                  onValueChange={(itemValue) => {
+                    onChange(itemValue === 0 ? undefined : itemValue);
+                    setSelectedMembers([]);
+                  }}
+                  style={[localStyles.picker, { color: colors.text }]}
+                >
+                  <Picker.Item label="Nenhuma" value={0} />
+                  {subscriptions?.map((sub) => (
+                    <Picker.Item
+                      key={sub.id}
+                      label={sub.name}
+                      value={sub.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+          />
+        </FormGroup>
+
+        {groupDetails && groupDetails.members && watchedSubscriptionId ? (
+          <FormGroup>
+            <FormLabel>Dividir com (Membros do Grupo)</FormLabel>
+            {groupDetails.members.map((member) => (
+              <Checkbox
+                key={member.id}
+                checked={watchedParticipants.includes(member.id)}
+                onPress={() => handleToggleMember(member.id)}
+                label={member.fullName || ''}
+              />
+            ))}
+          </FormGroup>
+        ) : !watchedSubscriptionId ? (
+          <FormGroup>
+            <FormLabel>Dividir com</FormLabel>
+            <View
+              style={[
+                localStyles.searchContainer,
+                { borderColor: colors.border },
+              ]}
+            >
+              <FontAwesome
+                name="search"
+                size={16}
+                color={colors.textSecondary}
+                style={localStyles.searchIcon}
+              />
+              <TextInput
+                style={[localStyles.searchInput, { color: colors.text }]}
+                placeholder="Buscar usuário por nome..."
+                placeholderTextColor={colors.textSecondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            {isSearching && <ActivityIndicator style={{ marginTop: 8 }} />}
+            <View
+              style={[
+                localStyles.searchResultsContainer,
+                { borderColor: colors.border },
+              ]}
+            >
+              {searchResults.map((user, index) => (
+                <TouchableOpacity
+                  key={user.id}
                   style={[
-                    styles.pickerContainer,
+                    localStyles.searchResultItem,
                     {
-                      borderColor: errors.subscriptionId
-                        ? colors.error
-                        : colors.border,
+                      borderBottomColor: colors.border,
+                      borderBottomWidth:
+                        index === searchResults.length - 1 ? 0 : 1,
                     },
                   ]}
+                  onPress={() => handleSelectMember(user)}
                 >
-                  <Picker
-                    selectedValue={value}
-                    onValueChange={onChange}
-                    style={[styles.picker, { color: colors.text }]}
-                  >
-                    <Picker.Item label="Selecione uma assinatura" value={0} />
-                    {filteredSubscriptions?.map((sub) => (
-                      <Picker.Item
-                        key={sub.id}
-                        label={sub.name}
-                        value={sub.id}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              )}
-            />
-            {errors.subscriptionId && (
-              <Text style={[styles.errorText, { color: colors.error }]}>
-                {errors.subscriptionId.message}
-              </Text>
-            )}
-          </View>
-
-          {groupDetails && groupDetails.members && (
-            <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>
-                Dividir com
-              </Text>
-              {groupDetails.members.map((member) => (
-                <TouchableOpacity
-                  key={member.id}
-                  style={styles.memberRow}
-                  onPress={() => handleToggleMember(member.id)}
-                >
-                  <FontAwesome
-                    name={
-                      watchedParticipants.includes(member.id)
-                        ? 'check-square-o'
-                        : 'square-o'
-                    }
-                    size={24}
-                    color={colors.primary}
-                  />
-                  <Text style={[styles.memberName, { color: colors.text }]}>
-                    {member.fullName}
-                  </Text>
+                  <Body>{user.fullName}</Body>
                 </TouchableOpacity>
               ))}
-              {errors.participants && (
-                <Text style={[styles.errorText, { color: colors.error }]}>
-                  {errors.participants.message}
-                </Text>
-              )}
             </View>
-          )}
-
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Descrição *
-            </Text>
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: errors.description
-                        ? colors.error
-                        : colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.card,
-                    },
-                  ]}
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Ex: Renovação mensal, Taxa de cancelamento"
-                  placeholderTextColor={colors.tint}
-                  maxLength={200}
-                />
-              )}
-            />
-            {errors.description && (
-              <Text style={[styles.errorText, { color: colors.error }]}>
-                {errors.description.message}
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Valor (R$) *
-            </Text>
-            <Controller
-              control={control}
-              name="amount"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      borderColor: errors.amount ? colors.error : colors.border,
-                      color: colors.text,
-                      backgroundColor: colors.card,
-                    },
-                  ]}
-                  value={value?.toString()}
-                  onChangeText={(text) => {
-                    const numericValue = text.replace(/[^0-9.]/g, '');
-                    onChange(
-                      numericValue ? parseFloat(numericValue) : undefined
-                    );
-                  }}
-                  placeholder="0.00"
-                  placeholderTextColor={colors.tint}
-                  keyboardType="decimal-pad"
-                />
-              )}
-            />
-            {errors.amount && (
-              <Text style={[styles.errorText, { color: colors.error }]}>
-                {errors.amount.message}
-              </Text>
-            )}
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Categoria
-            </Text>
-            <Controller
-              control={control}
-              name="category"
-              render={({ field: { onChange, value } }) => (
-                <View
-                  style={[
-                    styles.pickerContainer,
-                    {
-                      borderColor: errors.category
-                        ? colors.error
-                        : colors.border,
-                    },
-                  ]}
+            <Row wrap>
+              {selectedMembers.map((user) => (
+                <Tag
+                  key={user.id}
+                  variant="primary"
+                  onRemove={() => handleRemoveMember(user.id)}
                 >
-                  <Picker
-                    selectedValue={value}
-                    onValueChange={onChange}
-                    style={[styles.picker, { color: colors.text }]}
-                  >
-                    {EXPENSE_CATEGORIES.map((category) => (
-                      <Picker.Item
-                        key={category}
-                        label={category}
-                        value={category}
-                      />
-                    ))}
-                  </Picker>
-                </View>
+                  {user.fullName}
+                </Tag>
+              ))}
+            </Row>
+          </FormGroup>
+        ) : null}
+
+        <Controller
+          control={control}
+          name="description"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormGroup>
+              <FormLabel required>Descrição</FormLabel>
+              <TextInput
+                style={[
+                  localStyles.input,
+                  {
+                    borderColor: errors.description
+                      ? colors.error
+                      : colors.border,
+                    color: colors.text,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder="Ex: Jantar de sexta, Compras do mercado"
+                placeholderTextColor={colors.textSecondary}
+                maxLength={200}
+              />
+              {errors.description && (
+                <FormError>{errors.description.message}</FormError>
               )}
-            />
-            {errors.category && (
-              <Text style={[styles.errorText, { color: colors.error }]}>
-                {errors.category.message}
-              </Text>
-            )}
-          </View>
-        </Card>
+            </FormGroup>
+          )}
+        />
 
-        <View style={styles.infoCard}>
-          <Text style={[styles.infoTitle, { color: colors.text }]}>
-            Sobre as Despesas
-          </Text>
-          <Text style={[styles.infoText, { color: colors.tint }]}>
-            • As despesas são visíveis para todos os membros da assinatura{'\n'}
-            • Use para registrar custos extras, renovações ou taxas{'\n'}• Ajuda
-            a manter transparência nos gastos compartilhados{'\n'}• Valores são
-            calculados automaticamente nos relatórios
-          </Text>
-        </View>
+        <Controller
+          control={control}
+          name="amount"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormGroup>
+              <FormLabel required>Valor Total (R$)</FormLabel>
+              <TextInput
+                style={[
+                  localStyles.input,
+                  {
+                    borderColor: errors.amount ? colors.error : colors.border,
+                    color: colors.text,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+                value={value?.toString() || ''}
+                onBlur={onBlur}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9.]/g, '');
+                  onChange(numericValue ? parseFloat(numericValue) : undefined);
+                }}
+                placeholder="0.00"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="decimal-pad"
+              />
+              {errors.amount && <FormError>{errors.amount.message}</FormError>}
+            </FormGroup>
+          )}
+        />
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.cancelButton, { borderColor: colors.border }]}
-            onPress={() => router.back()}
-          >
-            <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-              Cancelar
-            </Text>
-          </TouchableOpacity>
+        <Controller
+          control={control}
+          name="category"
+          render={({ field: { onChange, value } }) => (
+            <FormGroup>
+              <FormLabel>Categoria</FormLabel>
+              <View
+                style={[
+                  localStyles.pickerContainer,
+                  {
+                    borderColor: errors.category ? colors.error : colors.border,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+              >
+                <Picker
+                  selectedValue={value}
+                  onValueChange={onChange}
+                  style={[localStyles.picker, { color: colors.text }]}
+                >
+                  {EXPENSE_CATEGORIES.map((category) => (
+                    <Picker.Item
+                      key={category}
+                      label={category}
+                      value={category}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </FormGroup>
+          )}
+        />
+      </Card>
 
-          <TouchableOpacity
-            style={[
-              styles.createButton,
-              { backgroundColor: colors.primary },
-              createExpenseMutation.isPending && styles.disabledButton,
-            ]}
-            onPress={handleSubmit(onSubmit)}
-            disabled={createExpenseMutation.isPending}
-          >
-            <Text style={styles.createButtonText}>
-              {createExpenseMutation.isPending
-                ? 'Adicionando...'
-                : 'Adicionar Despesa'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <Section>
+        <Button
+          title={
+            createExpenseMutation.isPending
+              ? 'Adicionando...'
+              : 'Adicionar Despesa'
+          }
+          onPress={handleSubmit(onSubmit)}
+          loading={createExpenseMutation.isPending}
+          variant="primary"
+          fullWidth
+        />
+      </Section>
+    </ScrollContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 16,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  formCard: {
-    padding: 20,
-    marginBottom: 16,
-  },
-  formGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
+const localStyles = StyleSheet.create({
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: 12,
+    padding: 16,
     fontSize: 16,
-    minHeight: 48,
   },
   pickerContainer: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   picker: {
-    height: 48,
+    height: 50,
+    paddingHorizontal: 16,
   },
-  memberRow: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-  },
-  memberName: {
-    marginLeft: 12,
-    fontSize: 16,
-  },
-  infoCard: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
     borderWidth: 1,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 16,
   },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+  searchIcon: {
+    marginRight: 12,
   },
-  createButton: {
+  searchInput: {
     flex: 1,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-  },
-  createButtonText: {
-    color: 'white',
+    borderWidth: 0,
+    paddingVertical: 16,
     fontSize: 16,
-    fontWeight: '600',
   },
-  disabledButton: {
-    opacity: 0.5,
+  searchResultsContainer: {
+    borderWidth: 1,
+    borderRadius: 12,
+    marginTop: 8,
+    maxHeight: 150,
+    overflow: 'hidden',
   },
-  errorText: {
-    fontSize: 12,
-    color: 'red',
-    marginTop: 4,
+  searchResultItem: {
+    padding: 16,
   },
 });
