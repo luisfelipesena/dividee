@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CreateExpenseFormData,
@@ -9,27 +8,20 @@ import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { UserSelector } from '@/components/UserSelector';
 import {
+  Body,
   Button,
   Card,
-  ScrollContainer,
-  Section,
-  Heading,
-  Body,
+  Checkbox,
+  FormError,
   FormGroup,
   FormLabel,
-  FormError,
-  Row,
-  Tag,
-  Checkbox,
+  Heading,
+  ScrollContainer,
+  Section,
 } from '@/components/ui';
 import { useDesignSystem } from '@/hooks/useDesignSystem';
 import { useCreateExpense } from '@/hooks/useExpenses';
@@ -56,11 +48,9 @@ export default function AddExpenseScreen() {
   const createExpenseMutation = useCreateExpense();
   const { data: subscriptions } = useSubscriptions();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<PartialUser[]>([]);
   const [allUsers, setAllUsers] = useState<PartialUser[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<PartialUser[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   const {
     control,
@@ -94,15 +84,14 @@ export default function AddExpenseScreen() {
   useEffect(() => {
     if (!watchedSubscriptionId && allUsers.length === 0) {
       const fetchUsers = async () => {
-        setIsSearching(true);
+        setIsLoadingUsers(true);
         try {
           const data = await apiClient.searchUsers('');
           setAllUsers(data);
-          setSearchResults(data);
         } catch (error) {
           console.error('Error fetching users:', error);
         } finally {
-          setIsSearching(false);
+          setIsLoadingUsers(false);
         }
       };
       fetchUsers();
@@ -117,21 +106,6 @@ export default function AddExpenseScreen() {
       );
     }
   }, [groupDetails, setValue]);
-
-  useEffect(() => {
-    if (!watchedSubscriptionId) {
-      if (searchQuery.length > 0) {
-        const filtered = allUsers.filter((user) =>
-          (user.fullName || '')
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
-      } else {
-        setSearchResults(allUsers);
-      }
-    }
-  }, [searchQuery, allUsers, watchedSubscriptionId]);
 
   useEffect(() => {
     if (!watchedSubscriptionId) {
@@ -150,15 +124,8 @@ export default function AddExpenseScreen() {
     setValue('participants', newParticipants, { shouldValidate: true });
   };
 
-  const handleSelectMember = (user: PartialUser) => {
-    if (!selectedMembers.some((m) => m.id === user.id)) {
-      setSelectedMembers([...selectedMembers, user]);
-    }
-    setSearchQuery('');
-  };
-
-  const handleRemoveMember = (userId: number) => {
-    setSelectedMembers(selectedMembers.filter((m) => m.id !== userId));
+  const handleUsersChange = (users: PartialUser[]) => {
+    setSelectedMembers(users);
   };
 
   const onSubmit = async (data: CreateExpenseFormData) => {
@@ -201,23 +168,32 @@ export default function AddExpenseScreen() {
                   },
                 ]}
               >
-                <Picker
-                  selectedValue={value}
-                  onValueChange={(itemValue) => {
-                    onChange(itemValue === 0 ? undefined : itemValue);
-                    setSelectedMembers([]);
-                  }}
-                  style={[localStyles.picker, { color: colors.text }]}
+                <TouchableOpacity
+                  style={localStyles.pickerTouchable}
+                  activeOpacity={0.8}
                 >
-                  <Picker.Item label="Nenhuma" value={0} />
-                  {subscriptions?.map((sub) => (
+                  <Picker
+                    selectedValue={value}
+                    onValueChange={(itemValue) => {
+                      onChange(itemValue === 0 ? undefined : itemValue);
+                      setSelectedMembers([]);
+                    }}
+                    style={[localStyles.picker, { color: colors.text }]}
+                    dropdownIconColor={colors.text}
+                  >
                     <Picker.Item
-                      key={sub.id}
-                      label={sub.name}
-                      value={sub.id}
+                      label="Nenhuma assinatura selecionada"
+                      value={0}
                     />
-                  ))}
-                </Picker>
+                    {subscriptions?.map((sub) => (
+                      <Picker.Item
+                        key={sub.id}
+                        label={sub.name}
+                        value={sub.id}
+                      />
+                    ))}
+                  </Picker>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -238,61 +214,12 @@ export default function AddExpenseScreen() {
         ) : !watchedSubscriptionId ? (
           <FormGroup>
             <FormLabel>Dividir com</FormLabel>
-            <View
-              style={[
-                localStyles.searchContainer,
-                { borderColor: colors.border },
-              ]}
-            >
-              <FontAwesome
-                name="search"
-                size={16}
-                color={colors.textSecondary}
-                style={localStyles.searchIcon}
-              />
-              <TextInput
-                style={[localStyles.searchInput, { color: colors.text }]}
-                placeholder="Buscar usuário por nome..."
-                placeholderTextColor={colors.textSecondary}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
-            {isSearching && <ActivityIndicator style={{ marginTop: 8 }} />}
-            <View
-              style={[
-                localStyles.searchResultsContainer,
-                { borderColor: colors.border },
-              ]}
-            >
-              {searchResults.map((user, index) => (
-                <TouchableOpacity
-                  key={user.id}
-                  style={[
-                    localStyles.searchResultItem,
-                    {
-                      borderBottomColor: colors.border,
-                      borderBottomWidth:
-                        index === searchResults.length - 1 ? 0 : 1,
-                    },
-                  ]}
-                  onPress={() => handleSelectMember(user)}
-                >
-                  <Body>{user.fullName}</Body>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <Row wrap>
-              {selectedMembers.map((user) => (
-                <Tag
-                  key={user.id}
-                  variant="primary"
-                  onRemove={() => handleRemoveMember(user.id)}
-                >
-                  {user.fullName}
-                </Tag>
-              ))}
-            </Row>
+            <UserSelector
+              selectedUsers={selectedMembers}
+              onUsersChange={handleUsersChange}
+              allUsers={allUsers}
+              isLoading={isLoadingUsers}
+            />
           </FormGroup>
         ) : null}
 
@@ -372,19 +299,27 @@ export default function AddExpenseScreen() {
                   },
                 ]}
               >
-                <Picker
-                  selectedValue={value}
-                  onValueChange={onChange}
-                  style={[localStyles.picker, { color: colors.text }]}
+                <TouchableOpacity
+                  style={localStyles.pickerTouchable}
+                  activeOpacity={0.8}
                 >
-                  {EXPENSE_CATEGORIES.map((category) => (
-                    <Picker.Item
-                      key={category}
-                      label={category}
-                      value={category}
-                    />
-                  ))}
-                </Picker>
+                  <Picker
+                    selectedValue={value}
+                    onValueChange={onChange}
+                    style={[localStyles.picker, { color: colors.text }]}
+                    dropdownIconColor={colors.text}
+                    itemStyle={{ fontSize: 16 }}
+                  >
+                    {EXPENSE_CATEGORIES.map((category) => (
+                      <Picker.Item
+                        key={category}
+                        label={category}
+                        value={category}
+                        color={colors.text}
+                      />
+                    ))}
+                  </Picker>
+                </TouchableOpacity>
               </View>
             </FormGroup>
           )}
@@ -420,34 +355,12 @@ const localStyles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
   },
+  pickerTouchable: {
+    width: '100%',
+  },
   picker: {
-    height: 50,
+    height: 56,
     paddingHorizontal: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    borderWidth: 0,
-    paddingVertical: 16,
     fontSize: 16,
-  },
-  searchResultsContainer: {
-    borderWidth: 1,
-    borderRadius: 12,
-    marginTop: 8,
-    maxHeight: 150,
-    overflow: 'hidden',
-  },
-  searchResultItem: {
-    padding: 16,
   },
 });

@@ -50,7 +50,7 @@ router.post('/register', async (req: Request, res: Response) => {
         createdAt: newUser[0].createdAt,
       }
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 });
@@ -91,7 +91,7 @@ router.post('/login', async (req: Request, res: Response) => {
         createdAt: user.createdAt,
       }
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 });
@@ -115,7 +115,7 @@ router.get('/profile', authMiddleware, async (req: Request, res: Response) => {
       email: user.email,
       createdAt: user.createdAt,
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 });

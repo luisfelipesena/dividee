@@ -45,8 +45,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     res.status(201).json(newSubscription[0]);
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.status(500).json({ message: 'Não foi possível criar a assinatura.' });
   }
 });
@@ -90,8 +89,7 @@ router.get('/', async (req: Request, res: Response) => {
     }));
 
     res.json(response);
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.status(500).json({ message: 'Erro ao buscar assinaturas.' });
   }
 });
@@ -122,8 +120,7 @@ router.get('/public', async (req: Request, res: Response) => {
     }));
 
     res.json(response);
-  } catch (error) {
-    console.error(error);
+  } catch {
     res.status(500).json({ message: 'Erro ao buscar assinaturas públicas.' });
   }
 });
@@ -138,7 +135,7 @@ router.post('/:id/join', async (req: Request, res: Response) => {
       subscriptionId,
     });
     res.status(200).json({ message: 'Inscrito com sucesso!' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Não foi possível se inscrever.' });
   }
 });

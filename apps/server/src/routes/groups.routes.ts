@@ -30,7 +30,7 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     res.status(201).json(newGroup[0]);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Não foi possível criar o grupo.' });
   }
 });
@@ -55,7 +55,7 @@ router.get('/', async (req: Request, res: Response) => {
       }));
 
     res.json(groupsDetails);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro ao buscar grupos.' });
   }
 });
@@ -99,7 +99,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         role: ug.role,
       })),
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro ao buscar detalhes do grupo.' });
   }
 });
@@ -145,7 +145,7 @@ router.post('/:id/invite', async (req: Request, res: Response) => {
       message: 'Convite enviado com sucesso.',
       invitation: invitation[0],
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro ao enviar convite.' });
   }
 });
@@ -184,7 +184,7 @@ router.delete('/:id/leave', async (req: Request, res: Response) => {
       .where(and(eq(usersToGroups.userId, userId), eq(usersToGroups.groupId, groupId)));
 
     res.json({ message: 'Você saiu do grupo com sucesso.' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: 'Erro ao sair do grupo.' });
   }
 });

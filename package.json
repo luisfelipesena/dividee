@@ -4,7 +4,10 @@
   "scripts": {
     "mobile": "pnpm --filter mobile",
     "server": "pnpm --filter server",
-    "web": "pnpm --filter web"
+    "web": "pnpm --filter web",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix"
   },
   "devDependencies": {
     "eslint": "^9.4.0",

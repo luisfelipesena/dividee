@@ -17,16 +17,18 @@ router.post('/', async (req: Request, res: Response) => {
   const userId = req.user!.id;
 
   try {
-    // Verify user is member of the subscription
-    const membership = await db.query.usersToSubscriptions.findFirst({
-      where: (table, { and, eq }) =>
-        and(eq(table.userId, userId), eq(table.subscriptionId, subscriptionId)),
-    });
+    // Verify user is member of the subscription if subscriptionId is provided
+    if (subscriptionId) {
+      const membership = await db.query.usersToSubscriptions.findFirst({
+        where: (table, { and, eq }) =>
+          and(eq(table.userId, userId), eq(table.subscriptionId, subscriptionId)),
+      });
 
-    if (!membership) {
-      return res
-        .status(403)
-        .json({ message: 'Você não é membro desta assinatura.' });
+      if (!membership) {
+        return res
+          .status(403)
+          .json({ message: 'Você não é membro desta assinatura.' });
+      }
     }
 
     const [newExpense] = await db

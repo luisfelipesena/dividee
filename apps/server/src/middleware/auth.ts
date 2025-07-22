@@ -28,7 +28,7 @@ export async function authMiddleware(
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number };
     
     // Buscar informações completas do usuário
     const user = await db.query.users.findFirst({
@@ -51,7 +51,7 @@ export async function authMiddleware(
     };
 
     return next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ message: 'Token inválido' });
   }
 } 
